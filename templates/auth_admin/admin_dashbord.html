@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Fruits Dashboard</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'userr/css/open-iconic-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/owl.theme.default.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/icomoon.css' %}">
+
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-speed) ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .brand-wrap {
+            height: var(--header-height);
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+
+        .brand-logo {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: opacity var(--transition-speed);
+        }
+
+        .collapsed .brand-logo {
+            opacity: 0;
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            padding: 0.5rem;
+            transition: transform var(--transition-speed);
+        }
+
+        .collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        /* Menu Items */
+        .menu-list {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            padding: 0.5rem 1.5rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: background-color var(--transition-speed);
+        }
+
+        .menu-link:hover {
+            background-color: #f3f4f6;
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .menu-text {
+            transition: opacity var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .collapsed .menu-text {
+            opacity: 0;
+            display: none;
+        }
+
+        /* Main Content */
+        .main-wrap {
+            margin-left: var(--sidebar-width);
+            transition: margin var(--transition-speed) ease;
+            min-height: 100vh;
+        }
+
+        .main-wrap.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .main-header {
+            height: var(--header-height);
+            background: white;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Search Form */
+        .search-form {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            width: 150px;
+            z-index: 1;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            display: block;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Responsive Improvements */
+        @media (max-width: 768px) {
+            .content-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-wrap">
+            <a href="#" class="brand-logo">US Fruits</a>
+            <button class="toggle-btn">⬅</button>
+        </div>
+        <nav>
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'Admin_Dashbord' %}">
+                        <span class="menu-icon">&#127968;</span>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'Product' %}">
+                        <span class="menu-icon">&#128722;</span>
+                        <span class="menu-text">Products Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'Category' %}">
+                        <span class="menu-icon">&#128717;</span>
+                        <span class="menu-text">Category Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'User_Management' %}">
+                        <span class="menu-icon">&#128101;</span>
+                        <span class="menu-text">User Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'Order_Management' %}">
+                        <span class="menu-icon">&#128230;</span>
+                        <span class="menu-text">Order Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="{% url 'sales_report' %}">
+                        <span class="menu-icon"><i class="fas fa-chart-line"></i></span>  
+                        <span class="menu-text"> Sales Report</span>
+                    </a>
+                </li>
+                
+                <li class="menu-item">
+                    <a class="menu-link" href="#">
+                        <span class="menu-icon">&#128176;</span> 
+                        <span class="menu-text">Coupons Management</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-wrap">
+        <header class="main-header">
+            <form class="search-form">
+                <input type="text" class="search-input" placeholder="Search...">
+            </form>
+            <div class="header-nav">
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown()" style="font-size: 24px; cursor: pointer;">
+                        <span class="nav-icon">&#128100;</span>
+                    </a>
+                    <div class="dropdown-menu" id="profileDropdown" style="display: none;">
+                        <a href="#" class="dropdown-item" style="color: rgb(3, 3, 3);">Profile</a>
+                        <a href="{% url 'Admin_Logout' %}" class="dropdown-item" style="color: #ef4444;">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <section class="content-main">
+            {% csrf_token %}
+            <div class="content-header">
+                <h2 class="content-title">Dashboard</h2>               
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Sidebar Toggle
+        document.querySelector('.toggle-btn').addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-wrap').classList.toggle('expanded');
+        });     
+
+        // Profile Dropdown Toggle
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

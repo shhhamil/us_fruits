@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}US Fruits{% endblock %}</title>
+    
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'userr/css/open-iconic-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/owl.theme.default.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/bootstrap-datepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/icomoon.css' %}">
+    <link rel="stylesheet" href="{% static 'userr/css/style.css' %}">
+
+
+        <!-- Other head elements -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+    <style>
+        /* Core Styles */
+        :root {
+            --primary-color: #82ae46;
+            --hover-color: #6f9a3a;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding-top: 76px;
+        }
+
+        /* Navigation Styles */
+        .navbar-main {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            color: var(--text-color);
+            font-size: 24px;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .container-main {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Items */
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .nav-item {
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            font-size: 15px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Updated Search Form Styles */
+        .search-form {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 4px 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            width: 160px;
+            margin: 0 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .search-form:focus-within {
+            width: 200px;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(130, 174, 70, 0.15);
+        }
+
+        .search-input {
+            border: none;
+            background: none;
+            padding: 4px 8px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            color: #333;
+        }
+
+        .search-input::placeholder {
+            color: #aaa;
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        .search-button {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+        }
+
+        .search-button:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .search-button i {
+            font-size: 13px;
+        }
+
+        /* Responsive Search Form */
+        @media (max-width: 991px) {
+            .search-form {
+                width: 100%;
+                margin: 8px 0;
+                background: #f8f9fa;
+            }
+
+            .search-form:focus-within {
+                width: 100%;
+                background: #ffffff;
+            }
+        }
+
+        /* Icon Buttons */
+        .nav-item.cta-colored .nav-link {
+            position: relative;
+            padding: 8px;
+        }
+
+        .nav-item.cta-colored .nav-link i {
+            font-size: 18px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.cta-colored .nav-link:hover i {
+            color: var(--primary-color);
+        }
+
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                margin-top: 10px;
+            }
+
+            .nav-item {
+                margin: 5px 0;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container-main {
+                width: 95%;
+            }
+
+            .navbar-brand {
+                font-size: 20px;
+            }
+
+            .nav-link {
+                font-size: 14px;
+            }
+        }
+
+        /* Footer Improvements */
+        .ftco-footer {
+            background: #f8f9fa;
+            padding: 70px 0;
+            margin-top: 50px;
+        }
+
+        .ftco-footer-widget h2 {
+            color: var(--text-color);
+            font-size: 20px;
+            margin-bottom: 25px;
+        }
+
+        .ftco-footer-widget ul li a {
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .ftco-footer-widget ul li a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+
+        .ftco-footer-social li a {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .ftco-footer-social li a:hover {
+            background: var(--hover-color);
+            transform: translateY(-3px);
+        }        
+        /* Add these new styles for HTMX functionality */
+        .htmx-indicator {
+            display: none;
+            opacity: 0;
+            transition: opacity 500ms ease-in;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+            opacity: 1;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+            opacity: 1;
+        }
+
+        /* Notification System */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .notification {
+            background-color: white;
+            border-left: 4px solid #82ae46;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success { border-left-color: #82ae46; }
+        .notification.error { border-left-color: #dc3545; }
+        .notification.warning { border-left-color: #ffc107; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #82ae46;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #82ae46;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg navbar-light">
+        <div class="container container-main">
+            <a class="navbar-brand" href="{% url 'Home' %}">US Fruits</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto align-items-center">
+                    <li class="nav-item {% if request.resolver_match.url_name == 'Home' %}active{% endif %}">
+                        <a href="{% url 'Home' %}" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'Shop' %}active{% endif %}">
+                        <a href="{% url 'Shop' %}" class="nav-link">Shop</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'Error' %}active{% endif %}">
+                        <a href="{% url 'Error' %}" class="nav-link">About</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'Error' %}active{% endif %}">
+                        <a href="{% url 'Error' %}" class="nav-link">Contact</a>
+                    </li>
+    
+                    <!-- Search  -->
+                    <form class="search-form" 
+                    hx-get="{% url 'Shop' %}"
+                    hx-target="#product-list"
+                    hx-trigger="submit, input[name='search'] keyup delay:500ms"
+                    hx-indicator="#search-indicator">
+                  <input type="text" name="search" class="search-input" placeholder="Search..." autocomplete="off">
+                  <button type="submit" class="search-button">
+                      <i class="fas fa-search"></i>
+                      <div id="search-indicator" class="htmx-indicator">
+                          <div class="spinner-small"></div>
+                      </div>
+                  </button>
+              </form>
+              
+    
+                            <!-- Wishlist -->
+            <li class="nav-item cta-colored">
+                <a href="{% if user.is_authenticated %}{% url 'Wishlist' %}{% else %}{% url 'Main_Login' %}{% endif %}" 
+                class="nav-link position-relative">
+                    <i class="fas fa-heart"></i>
+                </a>
+            </li>
+
+            <!-- Cart -->
+            <li class="nav-item cta-colored">
+                <a href="{% if user.is_authenticated %}{% url 'Cart' %}{% else %}{% url 'Main_Login' %}{% endif %}" 
+                class="nav-link position-relative">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+            </li>
+
+                    <!-- User  -->
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                            <a class="nav-link" href="{% url 'Profile' %}">
+                                <i class="fas fa-user"></i>
+                            </a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'Main_Login' %}">
+                                <i class="fas fa-user"></i>
+                            </a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    {% block content %}
+    {% endblock %}
+
+    <!-- Footer -->
+    <footer class="ftco-footer ftco-section">
+      <div class="container">
+      	<div class="row">
+      		<div class="mouse">
+						<a href="#" class="mouse-icon">
+							<div class="mouse-wheel"><span class="ion-ios-arrow-up"></span></div>
+						</a>
+					</div>
+      	</div>
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">US fruits</h2>
+              <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia.</p>
+              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Menu</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Shop</a></li>
+                <li><a href="#" class="py-2 d-block">About</a></li>
+                <li><a href="#" class="py-2 d-block">Journal</a></li>
+                <li><a href="#" class="py-2 d-block">Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-4">
+             <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Help</h2>
+              <div class="d-flex">
+	              <ul class="list-unstyled mr-l-5 pr-l-3 mr-4">
+	                <li><a href="#" class="py-2 d-block">Shipping Information</a></li>
+	                <li><a href="#" class="py-2 d-block">Returns &amp; Exchange</a></li>
+	                <li><a href="#" class="py-2 d-block">Terms &amp; Conditions</a></li>
+	                <li><a href="#" class="py-2 d-block">Privacy Policy</a></li>
+	              </ul>
+	              <ul class="list-unstyled">
+	                <li><a href="#" class="py-2 d-block">FAQs</a></li>
+	                <li><a href="#" class="py-2 d-block">Contact</a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+            	<h2 class="ftco-heading-2">Have a Questions?</h2>
+            	<div class="block-23 mb-3">
+	              <ul>
+	                <li><span class="icon icon-map-marker"></span><span class="text">203 Fake St. Mountain View, San Francisco, California, USA</span></li>
+	                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+2 392 3929 210</span></a></li>
+	                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">info@yourdomain.com</span></a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+
+            <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+						  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+						  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+						</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- JavaScript -->
+
+ 
+
+    <script>
+        function toggleDropdown(event) {
+            const dropdownMenu = document.getElementById('userDropdownMenu');
+            dropdownMenu.classList.toggle('show');
+            event.stopPropagation();
+        }
+
+        function toggleNavbar() {
+            document.querySelector('.navbar-nav').classList.toggle('show');
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".wishlist-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    this.querySelector("i").style.color = this.querySelector("i").style.color === "black" ? "gray" : "black";
+                });
+            });
+
+            document.querySelectorAll(".cart-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    this.querySelector("i").style.color = this.querySelector("i").style.color === "black" ? "gray" : "black";
+                });
+            });
+        });
+
+         // HTMX Event Handlers
+         document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            evt.detail.target.classList.add('loading');
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            evt.detail.target.classList.remove('loading');
+        });
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        $(document).ready(function () {
+            function performSearch() {
+                let query = $("#search-input").val();
+                if (query.length >= 1) {
+                    $("#search-indicator").show();
+                    
+                    $.ajax({
+                        url: "{% url 'Shop' %}",
+                        type: "GET",
+                        data: { search: query },
+                        success: function (response) {
+                            $("#product-list").html(response);  // Ensure correct ID
+                        },
+                        complete: function () {
+                            $("#search-indicator").hide();
+                        }
+                    });
+                }
+            }
+        
+            let searchTimeout;
+            $("#search-input").on("keyup", function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 500);
+            });
+        
+            $("#search-form").on("submit", function (e) {
+                e.preventDefault();
+                performSearch();
+            });
+        });
+        
+    </script>
+    <script src="{% static 'userr/js/jquery.min.js' %}"></script>
+    <script src="{% static 'userr/js/jquery-migrate-3.0.1.min.js' %}"></script>
+    <script src="{% static 'userr/js/popper.min.js' %}"></script>
+    <script src="{% static 'userr/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'userr/js/jquery.easing.1.3.js' %}"></script>
+    <script src="{% static 'userr/js/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'userr/js/jquery.stellar.min.js' %}"></script>
+    <script src="{% static 'userr/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'userr/js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'userr/js/aos.js' %}"></script>
+    <script src="{% static 'userr/js/jquery.animateNumber.min.js' %}"></script>
+    <script src="{% static 'userr/js/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'userr/js/scrollax.min.js' %}"></script>
+    <script src="{% static 'userr/js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

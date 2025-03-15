@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load socialaccount %}  
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US-Fruits - Login</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-title {
+            font-size: 24px;
+            color: rgb(5, 69, 37);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #25a19b;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-login {
+            background: rgb(9, 63, 22);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 161, 155, 0.3);
+        }
+
+        .btn-login:hover {
+            background: rgb(3, 87, 28);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgb(9, 84, 40);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .forgot-password a {
+            color: rgb(11, 79, 19);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: rgb(4, 90, 41);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: rgb(19, 95, 23);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            color: rgb(24, 69, 15);
+        }
+
+        .social-login {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .social-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .g-signin2 {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .g-signin2 .abcRioButton {
+            border-radius: 50px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .g-signin2 .abcRioButton:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .right-section {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .right-section {
+                padding: 20px;
+            }
+
+            .input-group {
+                margin-bottom: 15px;
+            }
+
+            .login-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            color: #333;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .google-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: #333;
+        }
+
+        .google-btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="right-section">
+            <form method="POST" action="{% url 'Main_Login' %}">
+                {% csrf_token %}
+                <h1 class="login-title">Log In</h1>
+                
+                {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        <p class="alert alert-danger">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Display Form Errors if Using Django Forms -->
+            {% if form.errors %}
+                <div class="error-messages">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p class="error">{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+                <!-- Email Field -->
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="btn btn-login">Log In</button>
+
+                <!-- Forgot Password Link -->
+                <div class="forgot-password">
+                    <a href="{% url 'ForgotPassword' %}">Forgot Password?</a>
+                </div>
+
+                <!-- Signup Link -->
+                <div class="signup-link">
+                    Don't have an account? <a href="{% url 'SignUp' %}">Sign Up</a>
+                </div>
+            </form>
+
+            <!-- Social Login Section -->
+            <div class="social-login">
+                <p class="social-text">Or log in using</p>
+                <div class="social-buttons">
+                    <a href="{% provider_login_url 'google' %}" class="google-btn">
+                        <span>Continue with Google Login </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function onSignIn(googleUser) {
+        var id_token = googleUser.getAuthResponse().id_token;
+        
+        fetch('/google_login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                'token': id_token
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Login failed: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Login failed. Please try again.');
+        });
+    }
+    </script>
+</body>
+</html>

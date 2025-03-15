@@ -1,0 +1,654 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}US Fruits - Wishlist{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #82ae46;
+        --text-color: #333;
+        --light-bg: #f4f4f4;
+        --border-radius: 10px;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+    
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--light-bg);
+        padding:0;
+      }
+    
+      .hero-section {
+        margin-top: 4rem;
+        position: relative;
+        height: 500px;
+        width: 100%;
+      }
+    
+      .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        padding:0;
+      }
+    
+      .hero-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color:white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+    
+      .hero-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+    
+      /* Wishlist Styles */
+      .wishlist-container {
+        max-width: 1000px;
+        margin: 3rem auto;
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+      }
+    
+      .wishlist-header {
+        display: grid;
+        grid-template-columns: 100px 2fr 1fr 1fr 80px;
+        padding: 1rem 0;
+        border-bottom: 2px solid #eee;
+        font-weight: 600;
+        text-align: center;
+      }
+    
+      /* Desktop Wishlist Grid */
+      .wishlist-item {
+          display: grid;
+          grid-template-columns: 100px 2fr 1fr 1fr 80px;
+          align-items: center;
+          padding: 1.5rem;
+          gap: 1rem;
+          background: white;
+          border-radius: 10px;
+          margin-bottom: 15px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+    
+      .product-image img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+    
+      .add-to-cart-btn {
+        background:#82ae46;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        font-size: 0.9rem;
+      }
+    
+      .add-to-cart-btn:hover {
+        background: #128512;
+      }
+    
+      .remove-btn {
+        color: #dc3545;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: color 0.3s ease;
+      }
+    
+      .remove-btn:hover {
+        color: #c82333;
+      }
+    
+      .empty-wishlist {
+        text-align: center;
+        padding: 3rem 0;
+      }
+    
+      .empty-wishlist i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+      }
+    
+      .continue-shopping {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        margin-top: 1rem;
+        transition: transform 0.3s ease;
+      }
+
+      .continue-shopping:hover {
+        transform: translateY(-3px);
+        background: #6a9139;
+      }
+    
+      /* Updated Responsive Wishlist Styles */
+      @media (max-width: 768px) {
+          .wishlist-container {
+              padding: 15px;
+          }
+    
+          .wishlist-header {
+              display: none;
+          }
+    
+          .wishlist-item {
+              grid-template-columns: 1fr;
+              grid-template-areas: 
+                  "image"
+                  "info"
+                  "price"
+                  "action"
+                  "remove";
+              text-align: center;
+              padding: 20px;
+          }
+    
+          .product-image {
+              grid-area: image;
+              justify-self: center;
+          }
+    
+          .product-info {
+              grid-area: info;
+          }
+    
+          .item-price {
+              grid-area: price;
+              justify-self: center;
+              font-size: 1.2rem;
+              color: #82ae46;
+              padding: 10px 0;
+              margin: 10px 0;
+          }
+    
+          .add-to-cart-container {
+              grid-area: action;
+              justify-self: center;
+              margin: 10px 0;
+          }
+    
+          .remove-btn {
+              grid-area: remove;
+              justify-self: center;
+              margin-top: 10px;
+          }
+    
+          .product-image img {
+              width: 120px;
+              height: 120px;
+              object-fit: cover;
+              border-radius: 8px;
+          }
+      }
+    
+      @media (max-width: 480px) {
+          .wishlist-item {
+              padding: 15px;
+          }
+    
+          .product-image img {
+              width: 100px;
+              height: 100px;
+          }
+      }
+    
+      /* Notification Styles */
+      .notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 25px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 500;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transform: translateX(120%);
+          transition: transform 0.3s ease;
+      }
+    
+      .notification.show {
+          transform: translateX(0);
+      }
+    
+      .notification.success {
+          background-color: #82ae46;
+      }
+    
+      .notification.error {
+          background-color: #dc3545;
+      }
+    
+      .notification i {
+          font-size: 1.2rem;
+      }
+    
+      /* Delete Modal Styles */
+      .delete-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1000;
+          justify-content: center;
+          align-items: center;
+      }
+    
+      .delete-modal-content {
+          background: white;
+          padding: 25px;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          transform: translateY(-20px);
+          opacity: 0;
+          transition: all 0.3s ease;
+      }
+    
+      .delete-modal.active .delete-modal-content {
+          transform: translateY(0);
+          opacity: 1;
+      }
+    
+      .delete-modal-icon {
+          color: #dc3545;
+          font-size: 3rem;
+          margin-bottom: 15px;
+      }
+    
+      .delete-modal-title {
+          font-size: 1.25rem;
+          color: #333;
+          margin-bottom: 10px;
+          font-weight: 600;
+      }
+    
+      .delete-modal-message {
+          color: #666;
+          margin-bottom: 20px;
+      }
+    
+      .delete-modal-buttons {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+      }
+    
+      .delete-modal-btn {
+          padding: 10px 20px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+      }
+    
+      .delete-modal-btn.cancel {
+          background: #f8f9fa;
+          color: #333;
+      }
+    
+      .delete-modal-btn.cancel:hover {
+          background: #e9ecef;
+      }
+    
+      .delete-modal-btn.delete {
+          background: #dc3545;
+          color: white;
+      }
+    
+      .delete-modal-btn.delete:hover {
+          background: #c82333;
+      }
+
+      /* Wishlist icon styles */
+      .wishlist-heart {
+          color: #ff6b6b;
+          margin-right: 5px;
+      }
+
+      .clear-wishlist {
+          background: none;
+          border: 1px solid #dc3545;
+          color: #dc3545;
+          padding: 8px 16px;
+          border-radius: 5px;
+          font-weight: 500;
+          margin-bottom: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+      }
+
+      .clear-wishlist:hover {
+          background: #dc3545;
+          color: white;
+      }
+
+      .wishlist-actions {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20px;
+      }
+
+      .wishlist-title {
+          font-size: 1.5rem;
+          color: var(--text-color);
+          font-weight: 600;
+      }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<!-- Add this right after your opening body tag -->
+<div id="notification" class="notification" style="display: none;">
+    <i class="fas fa-check-circle"></i>
+    <span id="notification-message"></span>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <img src="{% static 'userr/images/main.image6.jpg' %}" alt="Fresh Fruits" class="hero-image">
+    <div class="hero-overlay">
+        <h2 class="hero-title"><b>Wishlist</b></h2>
+        <p class="hero-subtitle">Save your favorite fruits for later</p>
+    </div>
+</section>
+
+<!-- Wishlist Container -->
+<div class="wishlist-container">
+
+    <div class="wishlist-header">
+        <div>Image</div>
+        <div>Product</div>
+        <div>Price</div>
+        <div>Action</div>
+        <div>Remove</div>
+    </div>
+
+    <div id="wishlist-items">
+        {% if wishlist_items %}
+            {% for item in wishlist_items %}
+            <div class="wishlist-item" 
+                 id="wishlist-item-{{ item.id }}" 
+                 data-id="{{ item.id }}">
+                 
+                <div class="product-image">
+                    <img src="{{ item.product.photo_1.url }}" alt="{{ item.product.name }}">
+                </div>
+
+                <div class="product-info">
+                    <h5>{{ item.product.name }}</h5>
+                    <p>{{ item.product.short_description|truncatechars:80 }}</p>
+                </div>
+
+                <div class="item-price">₹{{ item.product.offer_price }}</div>
+
+                <div class="add-to-cart-container">
+                    <button type="button" class="add-to-cart-btn" data-product-id="{{ item.product.id }}">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+
+                <!-- Remove Button -->
+                <button type="button" class="remove-btn" data-item-id="{{ item.id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-wishlist">
+                <i class="fas fa-heart-broken"></i>
+                <p>Your wishlist is empty</p>
+                <a href="{% url 'Shop' %}" class="continue-shopping">Continue Shopping</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="delete-modal" id="deleteModal">
+    <div class="delete-modal-content">
+        <div class="delete-modal-icon">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <h3 class="delete-modal-title">Remove Item</h3>
+        <p class="delete-modal-message">Remove this item from your wishlist?</p>
+        <div class="delete-modal-buttons">
+            <button class="delete-modal-btn cancel" id="cancelDelete">Cancel</button>
+            <button class="delete-modal-btn delete" id="confirmDelete">Remove</button>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Wishlist Confirmation Modal -->
+<div class="delete-modal" id="clearWishlistModal">
+    <div class="delete-modal-content">
+        <div class="delete-modal-icon">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <h3 class="delete-modal-title">Clear Wishlist</h3>
+        <p class="delete-modal-message">Are you sure you want to remove all items from your wishlist?</p>
+        <div class="delete-modal-buttons">
+            <button class="delete-modal-btn cancel" id="cancelClearWishlist">Cancel</button>
+            <button class="delete-modal-btn delete" id="confirmClearWishlist">Clear All</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        const messageElement = document.getElementById('notification-message');
+        
+        notification.className = `notification ${type}`;
+        messageElement.textContent = message;
+        
+        notification.style.display = 'flex';
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add to Cart functionality
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.getAttribute('data-product-id');
+                if (!productId) return;
+
+                try {
+                    this.disabled = true;
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                    const formData = new FormData();
+                    formData.append('quantity', '1');
+                    formData.append('csrfmiddlewaretoken', csrftoken);
+
+                    const response = await fetch(`/cart/add/${productId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        showNotification('Product added to cart successfully!', 'success');
+                        // Update cart count if it exists
+                        const cartCount = document.querySelector('.cart-count');
+                        if (cartCount && data.cart_count) {
+                            cartCount.textContent = data.cart_count;
+                        }
+                    } else {
+                        throw new Error(data.message || 'Failed to add to cart');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification(error.message || 'Error adding to cart', 'error');
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                }
+            });
+        });
+
+        // Remove from wishlist functionality
+        const removeButtons = document.querySelectorAll('.remove-btn');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                if (!itemId) return;
+
+                const deleteModal = document.getElementById('deleteModal');
+                deleteModal.style.display = 'flex';
+                deleteModal.classList.add('active');
+
+                const confirmDelete = document.getElementById('confirmDelete');
+                confirmDelete.onclick = async function() {
+                    try {
+                        const formData = new FormData();
+                        formData.append('csrfmiddlewaretoken', csrftoken);
+
+                        const response = await fetch(`/remove/${itemId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrftoken,
+                            },
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (data.status === 'success') {
+                            const item = document.getElementById('wishlist-item-' + itemId);
+                            console.log(item, 'item fromn the whishilisty')
+                            if (item) {
+                                item.style.animation = 'fadeOut 0.3s ease';
+                                setTimeout(() => {
+                                    item.remove();
+                                    if (document.querySelectorAll('.wishlist-item').length === 0) {
+                                        window.location.reload();
+                                    }
+                                }, 300);
+                            }
+                            showNotification('Item removed from wishlist', 'success');
+                        } else {
+                            throw new Error(data.message || 'Failed to remove item');
+                        }
+                    } catch (error) {
+                        console.log('Error:', error);
+                        console.error('Error:', error);
+                        showNotification(error.message || 'Error removing item', 'error');
+                    } finally {
+                        deleteModal.classList.remove('active');
+                        setTimeout(() => {
+                            deleteModal.style.display = 'none';
+                        }, 300);
+                    }
+                };
+            });
+        });
+
+        
+
+        // Cancel buttons
+        ['cancelDelete', 'cancelClearWishlist'].forEach(id => {
+            const cancelBtn = document.getElementById(id);
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    const modal = this.closest('.delete-modal');
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                });
+            }
+        });
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.delete-modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    setTimeout(() => {
+                        this.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

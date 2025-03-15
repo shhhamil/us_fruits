@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load socialaccount %}  
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US-Fruits - Reset Password</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .reset-title {
+            font-size: 24px;
+            color: rgb(5, 69, 37);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .reset-description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #25a19b;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-reset {
+            background: rgb(9, 63, 22);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 161, 155, 0.3);
+        }
+
+        .btn-reset:hover {
+            background: rgb(3, 87, 28);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgb(9, 84, 40);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: rgb(19, 95, 23);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: rgb(24, 69, 15);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .right-section {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .right-section {
+                padding: 20px;
+            }
+
+            .input-group {
+                margin-bottom: 15px;
+            }
+
+            .reset-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="right-section">
+            <form method="POST" action="{% url 'ResetPassword' %}">
+                {% csrf_token %}
+                <h1 class="reset-title">Reset Password</h1>
+                <p class="reset-description">Please enter your new password below. Make sure it's secure and easy to remember.</p>
+                
+                {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        <p class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Display Form Errors if Using Django Forms -->
+                {% if form.errors %}
+                    <div class="error-messages">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <p class="error">{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <!-- Hidden field for the token -->
+                <input type="hidden" name="token" value="{{ token }}">
+                
+                <!-- New Password Field -->
+                <div class="input-group">
+                    <label for="new_password">New Password:</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="input-group">
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+
+                <!-- Reset Button -->
+                <button type="submit" class="btn btn-reset">Reset Password</button>
+
+                <!-- Login Link -->
+                <div class="login-link">
+                    Remember your password? <a href="{% url 'Main_Login' %}">Log In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

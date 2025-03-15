@@ -1,0 +1,586 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}US Fruits - Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Core Layout */
+    .profile-wrapper {
+        display: flex;
+        min-height: calc(100vh - 76px);
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        margin-top: 76px;
+        position: relative;
+    }
+
+    /* Enhanced Sidebar Styles */
+    .sidebar {
+        width: 280px;
+        background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.07);
+        padding: 2rem 1.2rem;
+        position: fixed;
+        height: calc(100vh - 76px);
+        top: 76px;
+        z-index: 99;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    /* Main Content Area */
+    .main-content {
+        flex: 1;
+        margin-left: 280px;
+        padding: 2rem 3rem;
+        transition: all 0.3s ease;
+        width: calc(100% - 280px);
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        padding: 3rem;
+        max-width: 800px;
+        margin: 0 auto;
+        transition: all 0.3s ease;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .profile-header h2 {
+        color: #333;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .profile-header p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .profile-info {
+        padding: 1rem 0;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .info-row:hover {
+        background: #f0f2f5;
+        transform: translateX(5px);
+    }
+
+    .info-label {
+        width: 120px;
+        color: #666;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .info-value {
+        flex: 1;
+        color: #333;
+        font-weight: 500;
+        font-size: 1rem;
+        padding-left: 1.5rem;
+    }
+
+    .edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.8rem 2rem;
+        margin-top: 2rem;
+        background: #82ae46;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(130, 174, 70, 0.2);
+    }
+
+    .edit-btn i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .edit-btn:hover {
+        background: #6f9539;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(130, 174, 70, 0.3);
+    }
+
+    /* Sidebar Elements */
+    .side.flex-column {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .side-item {
+        width: 100%;
+        margin: 0.5rem 0;
+        position: relative;
+    }
+
+    .side-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #555;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        margin: 0.3rem 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .side-link i {
+        width: 24px;
+        margin-right: 15px;
+        font-size: 1.2rem;
+        color: #82ae46;
+        transition: all 0.3s ease;
+    }
+
+    .side-link span {
+        font-weight: 500;
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 1200px) {
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .profile-card {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .main-content {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 80px;
+            padding: 2rem 0.5rem;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+            padding: 1.5rem;
+        }
+
+        .side-link {
+            padding: 1rem;
+            justify-content: center;
+        }
+
+        .side-link i {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .side-link span {
+            display: none;
+        }
+
+        .profile-card {
+            padding: 2rem;
+        }
+
+        .profile-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .profile-header h2 {
+            font-size: 1.75rem;
+        }
+
+        .info-row {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .info-label {
+            width: 100px;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            padding-left: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .sidebar {
+            width: 60px;
+            padding: 1.5rem 0.3rem;
+        }
+
+        .main-content {
+            margin-left: 60px;
+            width: calc(100% - 60px);
+            padding: 1rem;
+        }
+
+        .side-link {
+            padding: 0.8rem;
+        }
+
+        .side-link i {
+            font-size: 1.2rem;
+        }
+
+        .profile-card {
+            padding: 1.5rem;
+        }
+
+        .profile-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        .profile-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .profile-header p {
+            font-size: 0.95rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+
+        .info-label {
+            width: 100%;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            padding-left: 0;
+        }
+
+        .edit-btn {
+            width: 100%;
+            padding: 0.7rem 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Footer Responsiveness */
+    .ftco-footer {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        transition: all 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .ftco-footer {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .ftco-footer {
+            margin-left: 60px;
+            width: calc(100% - 60px);
+        }
+    }
+
+    /* Form Responsiveness */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 576px) {
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            height: 45px;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Hover and Active States */
+    .side-link:hover {
+        background: rgba(130, 174, 70, 0.08);
+        color: #82ae46;
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(130, 174, 70, 0.1);
+    }
+
+    .side-link.active {
+        background: #82ae46;
+        color: white;
+        box-shadow: 0 6px 20px rgba(130, 174, 70, 0.2);
+    }
+
+    .side-link.active i {
+        color: white;
+    }
+
+    /* Smooth Scrollbar */
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: #82ae46;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: #6f9539;
+    }
+
+    /* Touch Device Optimization */
+    @media (hover: none) {
+        .side-link:hover {
+            transform: none;
+        }
+        
+        .profile-card:hover {
+            transform: none;
+        }
+    }
+
+    /* Print Media Query */
+    @media print {
+        .sidebar {
+            display: none;
+        }
+
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .profile-card {
+            box-shadow: none;
+        }
+    }
+
+    /* Hover Glow Effect */
+    .side-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: #82ae46;
+        border-radius: 0 4px 4px 0;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .side-link:hover::before,
+    .side-link.active::before {
+        opacity: 1;
+    }
+
+    /* Modal Enhancements */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-group label {
+        color: #555;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.8rem 1rem;
+        height: auto;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #82ae46;
+        box-shadow: 0 0 0 0.2rem rgba(130, 174, 70, 0.15);
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="side flex-column">
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Profile' %}">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Order-history' %}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>My Orders</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Change_Password' %}">
+                    <i class="fas fa-lock"></i>
+                    <span>Security</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'List_Address' %}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Addresses</span>
+                </a>
+            </div>            <div class="side-item">
+                <a class="side-link" href="{% url 'wallet' %}">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Main_Logout' %}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>Welcome, {{ user.username }}!</h2>
+                <p class="text-muted">Manage your profile details below</p>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ user.email }}</span>
+                </div>
+            </div>
+
+            <button class="edit-btn" data-toggle="modal" data-target="#editProfileModal">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'Profile' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" name="username" value="{{ user.username }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Set active side item
+        $('.side-link').each(function() {
+            if ($(this).attr('href') === window.location.pathname) {
+                $(this).addClass('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

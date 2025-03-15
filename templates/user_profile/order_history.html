@@ -1,0 +1,1666 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}US Fruits - Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Core Layout */
+.profile-wrapper {
+    display: flex;
+    min-height: calc(100vh - 76px);
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    margin-top: 76px;
+    position: relative;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+/* Enhanced Sidebar Styles */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.07);
+    padding: 2rem 1.2rem;
+    position: fixed;
+    height: calc(100vh - 76px);
+    top: 76px;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+/* Sidebar Elements */
+.side.flex-column {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.side-item {
+    width: 100%;
+    margin: 0.5rem 0;
+    position: relative;
+}
+
+.side-link {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    color: #555;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    margin: 0.3rem 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.side-link i {
+    width: 24px;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: #82ae46;
+    transition: all 0.3s ease;
+}
+
+.side-link span {
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+@media (max-width: 768px) {
+    .sidebar {
+        width: 80px;
+        padding: 2rem 0.5rem;
+    }
+
+    .main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding: 1.5rem;
+    }
+
+    .side-link {
+        padding: 1rem;
+        justify-content: center;
+    }
+
+    .side-link i {
+        margin: 0;
+        font-size: 1.4rem;
+    }
+
+    .side-link span {
+        display: none;
+    }
+
+ 
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 60px;
+        padding: 1.5rem 0.3rem;
+    }
+
+    .main-content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+        padding: 1rem;
+    }
+
+    .side-link {
+        padding: 0.8rem;
+    }
+
+    .side-link i {
+        font-size: 1.2rem;
+    }
+ 
+}
+
+ 
+/* Enhanced Table Styles */
+.table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.order-table thead {
+    background: #2c3e50;
+}
+
+.order-table th {
+    padding: 1.2rem 1.5rem;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.order-table td {
+    padding: 1.2rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #edf2f7;
+}
+
+/* Action Cell Styles */
+.actions-cell {
+    white-space: nowrap;
+    text-align: center;
+    min-width: 100px;
+    padding: 0.8rem !important;
+}
+
+/* Enhanced Action Buttons */
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin: 0 3px;
+    padding: 0;
+}
+
+.view-btn {
+    background: #e5e7eb;
+    color: #4b5563;
+}
+
+.cancel-btn {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.view-btn:hover {
+    background: #d1d5db;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-btn:hover {
+    background: #fecaca;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.action-btn i {
+    font-size: 0.9rem;
+}
+
+/* Table Cell Specific Styles */
+.order-id {
+    font-weight: 600;
+    color: #2d3748;
+    min-width: 80px;
+}
+
+.price-cell {
+    font-weight: 600;
+    color: #82ae46;
+    min-width: 100px;
+}
+
+.date-cell {
+    color: #4a5568;
+    min-width: 120px;
+}
+
+.status-cell {
+    min-width: 140px;
+}
+
+.payment-cell {
+    min-width: 140px;
+}
+
+/* Product Cell Styles */
+.product-cell {
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.product-item:hover {
+    background: #f1f5f9;
+    transform: translateX(5px);
+}
+
+.product-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.product-details {
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 500;
+    color: #2d3748;
+    margin-bottom: 0.2rem;
+}
+
+.product-quantity {
+    font-size: 0.85rem;
+    color: #64748b;
+    background: #e2e8f0;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Enhanced Status Badges */
+.status-badge {
+    padding: 0.6rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: #fff8e1;
+    color: #b45309;
+}
+
+.status-badge.shipped {
+    background: #e8f5e9;
+    color: #059669;
+}
+
+.status-badge.delivered {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.status-badge.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Enhanced Payment Badge */
+.payment-badge {
+    padding: 0.6rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    white-space: nowrap;
+}
+
+/* Responsive Table Adjustments */
+@media (max-width: 1200px) {
+    .table-container {
+        overflow-x: auto;
+        padding: 0;
+    }
+    
+    .order-table {
+        min-width: 1000px;
+    }
+
+    .actions-cell {
+        position: sticky;
+        right: 0;
+        background: white;
+        box-shadow: -5px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-table th:last-child {
+        position: sticky;
+        right: 0;
+        background: #82ae46;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .action-btn i {
+        font-size: 0.85rem;
+    }
+
+    .order-table td, .order-table th {
+        padding: 1rem;
+    }
+}
+
+/* Empty State Enhancement */
+.empty-state {
+    padding: 4rem 2rem !important;
+    text-align: center;
+}
+
+.empty-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.empty-content i {
+    font-size: 3.5rem;
+    color: #82ae46;
+    opacity: 0.8;
+}
+
+.empty-content h3 {
+    font-size: 1.8rem;
+    color: #2d3748;
+}
+
+.empty-content p {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.shop-now-btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: #82ae46;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.shop-now-btn:hover {
+    background: #6f9539;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(130, 174, 70, 0.2);
+}
+/* Footer Responsiveness */
+.ftco-footer {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .ftco-footer {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+}
+/* Hover and Active States */
+    .side-link:hover {
+        background: rgba(130, 174, 70, 0.08);
+        color: #82ae46;
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(130, 174, 70, 0.1);
+    }
+
+    .side-link.active {
+        background: #82ae46;
+        color: white;
+        box-shadow: 0 6px 20px rgba(130, 174, 70, 0.2);
+    }
+
+    .side-link.active i {
+        color: white;
+    }
+
+    /* Smooth Scrollbar */
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: #82ae46;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: #6f9539;
+    }
+
+    /* Touch Device Optimization */
+    @media (hover: none) {
+        .side-link:hover {
+            transform: none;
+        }
+        
+        .profile-card:hover {
+            transform: none;
+        }
+    }
+
+
+
+@media (max-width: 576px) {
+    .ftco-footer {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+    }
+}
+.table-head{
+    background-color:#82ae46;
+}
+
+/* Enhanced Modal Styles */
+.order-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-content {
+    background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+    width: 92%;
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.4s ease-out;
+    position: relative;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: #82ae46;
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.close-modal {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Scrollbar Styles */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #82ae46;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #6f9539;
+}
+
+/* Cancel Modal Specific Styles */
+#cancelOrderModal .modal-content {
+    max-width: 500px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    margin: 20px auto;
+}
+
+#cancelOrderModal .modal-header {
+    background: linear-gradient(to right, #dc2626, #ef4444);
+    padding: 1rem 1.5rem;
+    border-radius: 20px 20px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#cancelOrderModal .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    position: relative;
+}
+
+.cancel-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0 4rem 0;  /* Added bottom margin to prevent overlap with buttons */
+    padding-right: 5px;
+}
+
+.modal-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 20px 20px;
+}
+
+/* Improved button styles */
+.btn-cancel-confirm, .btn-cancel-back {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-cancel-confirm {
+    background: linear-gradient(to right, #dc2626, #ef4444);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.btn-cancel-back {
+    background: white;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-cancel-confirm:hover {
+    background: linear-gradient(to right, #b91c1c, #dc2626);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+}
+
+.btn-cancel-back:hover {
+    background: #f9fafb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom scrollbar for modal body */
+#cancelOrderModal .modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#cancelOrderModal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#cancelOrderModal .modal-body::-webkit-scrollbar-thumb {
+    background: #dc2626;
+    border-radius: 10px;
+}
+
+#cancelOrderModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #b91c1c;
+}
+
+@media (max-width: 480px) {
+    #cancelOrderModal .modal-content {
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        padding: 0.8rem;
+        gap: 0.6rem;
+    }
+
+    .btn-cancel-confirm, .btn-cancel-back {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Improved Timeline Styles */
+.timeline {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 3rem 0;
+    padding: 0 2rem;
+}
+
+.timeline::before {
+    background: linear-gradient(to right, #82ae46 0%, #82ae46 50%, #e2e8f0 50%);
+    background-size: 100% 100%;
+    transition: background-size 0.4s ease-in-out;
+}
+
+
+.timeline-item {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    background: white;
+    padding: 0 1rem;
+    flex: 1;
+}
+
+.timeline-point {
+    width: 24px;
+    height: 24px;
+    background: #e2e8f0;
+    border-radius: 50%;
+    margin: 18px auto;
+    position: relative;
+    z-index: 3;
+    transition: all 0.4s ease;
+    border: 4px solid white;
+    box-shadow: 0 0 0 3px #e2e8f0;
+}
+
+.timeline-item.active .timeline-point {
+    background: #82ae46;
+    box-shadow: 0 0 0 3px rgba(130, 174, 70, 0.4);
+    transform: scale(1.2);
+}
+
+.timeline-item i {
+    font-size: 2.2rem;
+    color: #a0aec0;
+    margin-bottom: 0.8rem;
+    transition: all 0.4s ease;
+    transform: translateY(0);
+}
+
+.timeline-item.active i {
+    color: #82ae46;
+    transform: translateY(-5px);
+}
+
+.timeline-item h4 {
+    font-size: 1.1rem;
+    color: #4a5568;
+    margin: 0.5rem 0;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.timeline-item.active h4 {
+    color: #82ae46;
+    font-weight: 600;
+    transform: scale(1.05);
+}
+
+.timeline-item .date {
+    font-size: 0.9rem;
+    color: #718096;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.4s ease;
+}
+
+.timeline-item.active .date {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Enhanced Detail Cards */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin: 2.5rem 0;
+}
+
+.detail-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(130, 174, 70, 0.1);
+}
+
+.detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.detail-card h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(130, 174, 70, 0.1);
+}
+
+.detail-card h4 i {
+    color: #82ae46;
+    font-size: 1.4rem;
+}
+
+/* Improved Order Items */
+.order-items-section {
+    margin-top: 2.5rem;
+}
+
+.order-items-section h4 {
+    font-size: 1.3rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.order-items-section h4 i {
+    color: #82ae46;
+}
+
+.items-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.item-card {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(130, 174, 70, 0.1);
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.item-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-details h4 {
+    color: #2d3748;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.item-details p {
+    color: #4a5568;
+    margin: 0.4rem 0;
+    font-size: 1rem;
+}
+
+.item-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #82ae46;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Summary Card */
+.summary-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-top: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(130, 174, 70, 0.1);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    color: #4b5563;
+    font-size: 1.1rem;
+}
+
+.summary-row:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.summary-row.total {
+    border-top: 2px solid #82ae46;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.3rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .timeline {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0;
+        margin-left: 2rem;
+    }
+
+    .timeline::before {
+        left: 12px;
+        right: auto;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        height: 100%;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+        padding: 1rem 0;
+        text-align: left;
+        margin: 1rem 0;
+    }
+
+    .timeline-point {
+        margin: 0;
+    }
+
+    .item-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .item-image {
+        width: 180px;
+        height: 180px;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .timeline-item.cancelled {
+        color: red;
+    }
+    
+    .timeline-item.cancelled .timeline-point {
+        background: red;
+        box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.4);
+    }
+    
+    .timeline-item.cancelled i {
+        color: red;
+    }
+    
+    .timeline-item.cancelled h4 {
+        color: red;
+    }
+    
+    .timeline-item.cancelled .date {
+        color: red;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+}
+
+/* Status Badge Styles */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-badge.pending {
+    background: #fff8e1;
+    color: #b45309;
+}
+
+.status-badge.processing {
+    background: #e8f5e9;
+    color: #059669;
+}
+
+.status-badge.shipped {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.status-badge.delivered {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.cancelled {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.address-details p {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #4a5568;
+}
+
+.address-details i {
+    color: #82ae46;
+    width: 20px;
+}
+
+.payment-details p {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #4a5568;
+}
+
+.payment-details i {
+    color: #82ae46;
+    width: 20px;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.order-date i {
+    color: #82ae46;
+}
+
+.payment-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+.payment-badge.cod {
+    background: #e8f5e9;
+    color: #059669;
+}
+
+.payment-badge.razorpay {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+.item-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.item-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #82ae46;
+    opacity: 0.5;
+}
+
+.modal-header i {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Add SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Sidebar -->
+    <div class="profile-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="side flex-column">
+                <div class="side-item">
+                    <a class="side-link" href="{% url 'Profile' %}">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </a>
+                </div>
+                <div class="side-item">
+                    <a class="side-link" href="{% url 'Order-history' %}">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>My Orders</span>
+                    </a>
+                </div>
+                <div class="side-item">
+                    <a class="side-link" href="{% url 'Change_Password' %}">
+                        <i class="fas fa-lock"></i>
+                        <span>Security</span>
+                    </a>
+                </div>
+                <div class="side-item">
+                    <a class="side-link" href="{% url 'List_Address' %}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Addresses</span>
+                    </a>
+                </div>            <div class="side-item">
+                    <a class="side-link" href="{% url 'wallet' %}">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </a>
+                </div>
+                <div class="side-item">
+                    <a class="side-link" href="{% url 'Main_Logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    <!-- Enhanced Order History Table -->
+    <div class="main-content">
+        <div class="order-history-container">
+            <div class="section-header">
+                <h2><b>My Orders</b></h2>
+                <p>Track and manage your orders</p>
+            </div>
+    
+            <div class="table-container">
+                <table class="order-table">
+                    <thead>
+                        <tr class='table-head'>
+                            <th>Order ID</th>
+                            <th>Products</th>
+                            <th>Order Date</th>
+                            <th>Order Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="order-id">
+                                <span class="id-badge">{{ order.id }}</span>
+                            </td>
+                            <td class="product-cell">
+                                <div class="product-list">
+                                    {% for item in order.items.all %}
+                                    <div class="product-item">
+                                        <img src="{{ item.product.photo_1.url }}" alt="{{ item.product.name }}">
+                                        <div class="product-details">
+                                            <span class="product-name">{{ item.product.name }}</span>
+                                            <span class="product-quantity">x{{ item.quantity }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                    
+                            <td class="date-cell">{{ order.date_of_order|date:"M d, Y" }}</td>
+                            <td class="status-cell">
+                                <span class="status-badge {{ order.status|lower }}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td class="payment-cell">
+                                <span class="payment-badge {{ order.payment_status|lower }}">
+                                    {{ order.payment_status }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <button class="action-btn view-btn" onclick="viewOrder({{ order.id }})" title="View Order">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+    
+                                {% if order.status|lower == 'pending' %}
+                                <button class="action-btn cancel-btn" onclick="cancelOrder({{ order.id }})" title="Cancel Order">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+    
+                                <!-- Invoice Download Button -->
+                                <a href="{% url 'generate_invoice' order.id %}" class="action-btn invoice-btn" title="Download Invoice">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="empty-content">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <h3>No Orders Yet</h3>
+                                    <p>Start shopping to see your orders here</p>
+                                    <a href="{% url 'Shop' %}" class="shop-now-btn">Shop Now</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="order-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order<span id="modalOrderId"></span></h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Enhanced Order Status Timeline -->
+                <div class="order-status-section">
+                    <div class="timeline" id="orderTimeline">
+                        <div class="timeline-item" id="pending">
+                            <div class="timeline-point"></div>
+                            <i class="fas fa-shopping-cart"></i>
+                            <h4>Order Placed</h4>
+                            <p class="date"></p>
+                        </div>
+                        <div class="timeline-item" id="processing">
+                            <div class="timeline-point"></div>
+                            <i class="fas fa-cog"></i>
+                            <h4>Processing</h4>
+                            <p class="date"></p>
+                        </div>
+                        <div class="timeline-item" id="shipped">
+                            <div class="timeline-point"></div>
+                            <i class="fas fa-truck"></i>
+                            <h4>Shipped</h4>
+                            <p class="date"></p>
+                        </div>
+                        <div class="timeline-item" id="delivered">
+                            <div class="timeline-point"></div>
+                            <i class="fas fa-check-circle"></i>
+                            <h4>Delivered</h4>
+                            <p class="date"></p>
+                        </div>
+                        <div class="timeline-item cancelled" id="cancelled">
+                            <div class="timeline-point"></div>
+                            <i class="fas fa-times-circle"></i>
+                            <h4>Cancelled</h4>
+                            <p class="date"></p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Order Details Grid -->
+                <div class="order-details-section">
+                    <div class="details-grid">
+                        <div class="detail-card">
+                            <h4><i class="fas fa-map-marker-alt"></i> Delivery Address</h4>
+                            <div id="deliveryAddress" class="detail-content"></div>
+                        </div>
+                        <div class="detail-card">
+                            <h4><i class="fas fa-coins"></i> Payment Information</h4>
+                            <div id="paymentInfo" class="detail-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                                </div>
+                </div>
+            </div>
+        </div>
+                </div>
+
+    <!-- Cancel Order Modal -->
+    <div id="cancelOrderModal" class="order-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header" style="background: #dc2626;">
+                <h3><i class="fas fa-exclamation-circle"></i> Cancel Order <span id="cancelOrderId"></span></h3>
+                <button class="close-modal" onclick="closeCancelModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                        </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Please select a reason for cancellation:</h4>
+                    <p style="color: #718096; font-size: 0.9rem;">This will help us improve our service.</p>
+                        </div>
+                <div class="cancel-reasons">
+                    <div class="reason-option">
+                        <input type="radio" name="cancelReason" id="reason1" value="Changed my mind">
+                        <label for="reason1">
+                            <span class="reason-text">Changed my mind</span>
+                            <span class="reason-desc">I no longer want this order</span>
+                        </label>
+                        </div>
+                    <div class="reason-option">
+                        <input type="radio" name="cancelReason" id="reason2" value="Ordered by mistake">
+                        <label for="reason2">
+                            <span class="reason-text">Ordered by mistake</span>
+                            <span class="reason-desc">I made a mistake while ordering</span>
+                        </label>
+                    </div>
+                    <div class="reason-option">
+                        <input type="radio" name="cancelReason" id="reason3" value="Found better price elsewhere">
+                        <label for="reason3">
+                            <span class="reason-text">Found better price elsewhere</span>
+                            <span class="reason-desc">I found the same product at a better price</span>
+                        </label>
+                </div>
+                    <div class="reason-option">
+                        <input type="radio" name="cancelReason" id="reason4" value="Other">
+                        <label for="reason4">
+                            <span class="reason-text">Other reason</span>
+                            <span class="reason-desc">None of the above reasons</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancel-confirm" onclick="confirmCancelOrder()">
+                        <i class="fas fa-check"></i>
+                        Confirm Cancellation
+                    </button>
+                    <button class="btn-cancel-back" onclick="closeCancelModal()">
+                        <i class="fas fa-times"></i>
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Set active side item
+        $('.side-link').each(function() {
+            if ($(this).attr('href') === window.location.pathname) {
+                $(this).addClass('active');
+            }
+        });
+    });
+
+    function updateTimeline(currentStatus) {
+        const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        const statusIndex = statuses.indexOf(currentStatus.toLowerCase());
+    
+        // Ensure valid status
+        if (statusIndex === -1) {
+            console.error("Invalid status:", currentStatus);
+            return;
+        }
+    
+        statuses.forEach((status, index) => {
+            const element = document.getElementById(status);
+            if (element) {
+                if (index <= statusIndex) {
+                    element.classList.add('active');
+                    element.querySelector('.date').textContent = new Date().toLocaleDateString();
+                } else {
+                    element.classList.remove('active');
+                    element.querySelector('.date').textContent = "";
+                }
+            }
+        });
+    
+        // If order is cancelled, remove all active states except "cancelled"
+        if (currentStatus.toLowerCase() === 'cancelled') {
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById('cancelled').classList.add('active');
+        }
+    
+        // Update progress bar dynamically
+        const progressBar = document.querySelector('.timeline::before');
+        if (progressBar && currentStatus !== "cancelled") {
+            const progressWidth = (statusIndex / (statuses.length - 1)) * 100;
+            progressBar.style.background = `linear-gradient(to right, #82ae46 ${progressWidth}%, #e2e8f0 ${progressWidth}%)`;
+        } else if (progressBar) {
+            progressBar.style.background = `#e2e8f0`;  
+        }
+    }
+    
+    // Example Usage (Test it by changing the status)
+    document.addEventListener("DOMContentLoaded", function () {
+        updateTimeline("cancelled"); // Change this to test other statuses
+    });
+    
+    
+    // Call the function after the DOM loads
+    document.addEventListener("DOMContentLoaded", function () {
+        updateTimeline("processing"); // Change to the current status
+    });
+    
+
+    function viewOrder(orderId) {
+        const modal = document.getElementById('orderModal');
+        modal.style.display = 'block';
+
+        // Fetch order details
+        fetch(`/order/details/${orderId}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data , "data")
+                // Update order ID and date
+                document.getElementById('modalOrderId').textContent = `${data.id} (${data.created_at})`;
+                // Update timeline
+                updateTimeline(data.status);
+
+        // Update delivery address
+        document.getElementById('deliveryAddress').innerHTML = `
+                    <div class="address-details">
+                        <p><i class="fas fa-map-marker-alt"></i> ${data.address.street}</p>
+                        <p><i class="fas fa-city"></i> ${data.address.city}, ${data.address.state}</p>
+                        <p><i class="fas fa-location-dot"></i> ${data.address.pin_code}</p>
+                        <p><i class="fas fa-phone"></i> ${data.address.phone}</p>
+                    </div>
+        `;
+
+        // Update payment info
+                document.getElementById('paymentInfo').innerHTML = `
+                    <div class="payment-details">
+                        {% comment %} <p><i class="fas fa-wallet"></i> <strong>Payment Method:</strong>  {% endcomment %}
+                            {% comment %} <span class="payment-badge ${data.payment_method.toLowerCase()}">${data}</span> {% endcomment %}
+                        {% comment %} </p> {% endcomment %}
+                        <p><i class="fas fa-clock"></i> <strong>Order Date:</strong> ${data.created_at}</p>
+                        <p><i class="fas fa-info-circle"></i> <strong>Order Status:</strong> 
+                            <span class="status-badge ${data.status.toLowerCase()}">${data.payment_method}</span>
+                       <p><i class="fas fa-info-circle"></i> <strong>Total Price:</strong> 
+   <span class="total-amount">₹${data.total_amount}</span>
+</p>
+
+                </div>
+                `;           
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Close modal handlers
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        document.getElementById('orderModal').style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('orderModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    let currentOrderId = null;
+
+    function cancelOrder(orderId) {
+        currentOrderId = orderId;
+        document.getElementById('cancelOrderId').textContent = orderId;
+        document.getElementById('cancelOrderModal').style.display = 'block';
+        
+        // Clear any previously selected reason
+        document.querySelectorAll('input[name="cancelReason"]').forEach(radio => {
+            radio.checked = false;
+        });
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelOrderModal').style.display = 'none';
+        currentOrderId = null;
+    }
+
+    function confirmCancelOrder() {
+        const selectedReason = document.querySelector('input[name="cancelReason"]:checked');
+        
+        if (!selectedReason) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Select a Reason',
+                text: 'Please select a reason for cancellation',
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Confirm Cancellation',
+            text: 'Are you sure you want to cancel this order?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#718096',
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                const confirmBtn = document.querySelector('.btn-cancel-confirm');
+                const originalText = confirmBtn.innerHTML;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+                confirmBtn.disabled = true;
+
+                // Send cancellation request to server
+                fetch(`/order/cancel/${currentOrderId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        reason: selectedReason.value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Cancelled',
+                            text: 'Your order has been successfully cancelled',
+                            confirmButtonColor: '#82ae46'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Failed to cancel order');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Failed to cancel order. Please try again.',
+                        confirmButtonColor: '#82ae46'
+                    });
+                })
+                .finally(() => {
+                    confirmBtn.innerHTML = originalText;
+                    confirmBtn.disabled = false;
+                    closeCancelModal();
+                });
+            }
+        });
+    }
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Make reason options clickable
+    document.querySelectorAll('.reason-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+        });
+    });
+</script>
+{% endblock %}

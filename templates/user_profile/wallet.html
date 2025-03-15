@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}US Fruits - Wallet{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        width: 280px;
+        background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.07);
+        padding: 2rem 1.2rem;
+        position: fixed;
+        height: calc(100vh - 76px);
+        top: 76px;
+        z-index: 99;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .side.flex-column {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .side-item {
+        width: 100%;
+        margin: 0.5rem 0;
+        position: relative;
+    }
+
+    .side-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #555;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        margin: 0.3rem 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .side-link i {
+        width: 24px;
+        margin-right: 15px;
+        font-size: 1.2rem;
+        color: #82ae46;
+        transition: all 0.3s ease;
+    }
+
+    .side-link span {
+        font-weight: 500;
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+    }
+
+    .side-link:hover {
+        background: rgba(130, 174, 70, 0.08);
+        color: #82ae46;
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(130, 174, 70, 0.1);
+    }
+
+    .side-link.active {
+        background: #82ae46;
+        color: white;
+        box-shadow: 0 6px 20px rgba(130, 174, 70, 0.2);
+    }
+
+    .side-link.active i {
+        color: white;
+    }
+
+    .main-content {
+        flex: 1;
+        margin-left: 280px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .wallet-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .wallet-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .header-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #82ae46, #6f9539);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 20px rgba(130, 174, 70, 0.2);
+    }
+
+    .header-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .wallet-header h2 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .wallet-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .wallet-balance-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .balance-amount {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #82ae46;
+        margin: 1rem 0;
+    }
+
+    .balance-label {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        background: #f8f9fa;
+        color: #555;
+        border: none;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        max-width: 180px;
+    }
+
+    .action-btn:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn.primary {
+        background: #82ae46;
+        color: white;
+    }
+
+    .action-btn.primary:hover {
+        background: #6f9539;
+        box-shadow: 0 4px 12px rgba(130, 174, 70, 0.2);
+    }
+
+    .transactions-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .view-all {
+        color: #82ae46;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .view-all:hover {
+        color: #6f9539;
+        text-decoration: underline;
+    }
+
+    .transaction-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .transaction-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .transaction-icon {
+        width: 45px;
+        height: 45px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #82ae46;
+    }
+
+    .transaction-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .transaction-title {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .transaction-date {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .transaction-amount {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .amount-credit {
+        color: #82ae46;
+    }
+
+    .amount-debit {
+        color: #e53e3e;
+    }
+
+    .add-money-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        color: #4a5568;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #82ae46;
+        box-shadow: 0 0 0 3px rgba(130, 174, 70, 0.1);
+        outline: none;
+    }
+
+    .submit-btn {
+        background: #82ae46;
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        background: #6f9539;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(130, 174, 70, 0.2);
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 0;
+        color: #888;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+
+    .empty-text {
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 80px;
+            padding: 2rem 0.5rem;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            padding: 1.5rem;
+        }
+
+        .side-link {
+            padding: 1rem;
+            justify-content: center;
+        }
+
+        .side-link i {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .side-link span {
+            display: none;
+        }
+
+        .wallet-balance-card, 
+        .transactions-card {
+            padding: 1.5rem;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .header-icon i {
+            font-size: 2rem;
+        }
+
+        .wallet-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .sidebar {
+            width: 60px;
+            padding: 1.5rem 0.3rem;
+        }
+
+        .main-content {
+            margin-left: 60px;
+            padding: 1rem;
+        }
+
+        .wallet-container {
+            padding: 0 0.5rem;
+        }
+
+        .wallet-balance-card, 
+        .transactions-card {
+            padding: 1.2rem;
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+        }
+
+        .submit-btn {
+            padding: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="side flex-column">
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Profile' %}">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Order-history' %}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>My Orders</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Change_Password' %}">
+                    <i class="fas fa-lock"></i>
+                    <span>Security</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'List_Address' %}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Addresses</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link active" href="{% url 'wallet' %}">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </a>
+            </div>
+            <div class="side-item">
+                <a class="side-link" href="{% url 'Main_Logout' %}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="wallet-container">
+            <div class="wallet-header">
+                <div class="header-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h2>My Wallet</h2>
+                <p>Manage your US Fruits account balance</p>
+            </div>
+    
+            <!-- Wallet Balance Card -->
+            <div class="wallet-balance-card">
+                <h3 class="balance-label">Available Balance</h3>
+                <div id="wallet-balance" class="balance-amount">
+                    ₹{{ wallet.balance }}
+                </div>
+                <p>Use your wallet balance for faster checkout</p>
+    
+                <div class="action-buttons">
+                    <button type="button" class="action-btn primary" data-toggle="modal" data-target="#addMoneyModal">
+                        <i class="fas fa-plus"></i>
+                        Add Money
+                    </button>
+                </div>
+            </div>
+    
+            <!-- Transaction History Card -->
+            <div class="transactions-card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Transactions</h3>
+                    <a href="{% url 'wallet' %}" class="view-all">View All</a>
+                </div>
+    
+                <div class="transaction-list">
+                    {% if transactions %}
+                        {% for transaction in transactions %}
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-icon">
+                                        {% if transaction.transaction_type == "credit" %}
+                                            <i class="fas fa-plus-circle text-success"></i>
+                                        {% else %}
+                                            <i class="fas fa-shopping-cart text-danger"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="transaction-details">
+                                        <span class="transaction-title">
+                                            {% if transaction.transaction_type == "credit" %}
+                                                Added to Wallet
+                                            {% else %}
+                                                Order {{ transaction.id }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="transaction-date">{{ transaction.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                <span class="transaction-amount {% if transaction.transaction_type == 'credit' %}amount-credit{% else %}amount-debit{% endif %}">
+                                    {% if transaction.transaction_type == "credit" %}
+                                        +₹{{ transaction.amount }}
+                                    {% else %}
+                                        -₹{{ transaction.amount }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-receipt empty-icon"></i>
+                            <p class="empty-text">No transactions yet.<br>Your transaction history will appear here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Money Modal -->
+    <div class="modal fade" id="addMoneyModal" tabindex="-1" role="dialog" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'add_money' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" class="form-control" id="amount" name="amount" min="1" placeholder="Enter amount" required>
+                        </div>
+    
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-plus"></i>
+                            Add Money
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}

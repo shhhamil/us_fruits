@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+
+    <link rel="stylesheet" href="{% static 'adminn/css/vendors' %}">
+    <link rel="stylesheet" href="{% static 'adminn/css/main.css.map' %}">
+    <link rel="stylesheet" href="{% static 'adminn/css/main.css' %}">
+   
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: white;
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1.5px solid #e1e1e1;
+            border-radius: 6px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        button {
+            background-color: #000;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
+            transform: translateY(-1px);
+        }
+
+        .error-list {
+            color: #dc3545;
+            list-style-type: none;
+            padding: 15px;
+            background-color: #fff5f5;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        /* Enhanced Modal Styles */
+        .cropper-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .cropper-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90vh;
+            width: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .cropper-container img {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+        }
+
+        .cropper-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        #crop-btn {
+            background-color: #000;
+            color: white;
+        }
+
+        #crop-btn:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        #cancel-btn {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        #cancel-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        /* Image preview styles */
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* Custom file input styling */
+        .file-input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .file-input-container input[type="file"] {
+            padding: 8px;
+            background-color: #f8f9fa;
+        }
+
+        /* Form sections styling */
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Switch styling */
+        .switch-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .form-check-input {
+            width: 45px !important;
+            height: 24px !important;
+            margin-right: 10px;
+        }
+
+        /* Messages styling */
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Edit Product</h1>
+    
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+    
+            <div class="form-group">
+                <label for="name">Product Name*</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ product.name }}" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="category">Category*</label>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="">Select a category</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="form-group">
+                <label for="price">Price*</label>
+                <input type="number" id="price" name="price" class="form-control" min="0" step="0.01"
+                    value="{{ product.price }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Product description</label>
+                <input type="text" id="description" name="description" class="form-control" value="{{ product.description }}" required>
+            </div>
+            
+    
+            <div class="form-group">
+                <label for="offer_percentage">Offer (%)</label>
+                <input type="number" id="offer_percentage" name="offer_percentage" class="form-control" min="0" max="100"
+                    step="0.01" value="{{ product.offer_percentage }}">
+            </div>
+    
+            <div class="form-group">
+                <label for="stock">Stock*</label>
+                <input type="number" id="stock" name="stock" class="form-control" min="0" value="{{ product.stock }}"
+                    required>
+            </div>
+    
+            <div class="file-input-container">
+                <label for="photo_1">Photo 1*</label>
+                <input type="file" id="photo_1" name="photo_1" accept="image/*" class="crop-image">
+                {% if product.photo_1 %}
+                <img src="{{ product.photo_1.url }}" alt="Photo 1" width="100">
+                {% endif %}
+            </div>
+    
+            <div class="file-input-container">
+                <label for="photo_2">Photo 2</label>
+                <input type="file" id="photo_2" name="photo_2" accept="image/*" class="crop-image">
+                {% if product.photo_2 %}
+                <img src="{{ product.photo_2.url }}" alt="Photo 2" width="100">
+                {% endif %}
+            </div>
+    
+            <div class="file-input-container">
+                <label for="photo_3">Photo 3</label>
+                <input type="file" id="photo_3" name="photo_3" accept="image/*" class="crop-image">
+                {% if product.photo_3 %}
+                <img src="{{ product.photo_3.url }}" alt="Photo 3" width="100">
+                {% endif %}
+            </div>
+    
+            <div class="form-check form-switch">
+                <input type="checkbox" id="is_active" name="is_active" class="form-check-input"
+                    {% if product.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Is Active?</label>
+            </div>
+    
+            <button type="submit" class="btn btn-primary w-100">Update Product</button>
+        </form>
+    </div>
+    
+    
+    <!-- Cropper Modal -->
+    <div class="cropper-modal">
+        <div class="cropper-container">
+            <div class="cropper-title">Crop Image</div>
+            <div class="cropper-content">
+                <img id="cropper-image" src="#" alt="Image to crop">
+            </div>
+            <div class="cropper-buttons">
+                <button id="crop-btn" class="modal-btn">Save Crop</button>
+                <button id="cancel-btn" class="modal-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'adminn/js/vendors' %}"></script>
+    <script src="{% static 'adminn/js/custom-chart.js' %}"></script>
+    <script src="{% static 'adminn/js/main.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+    <script>
+        let cropper;
+        let currentInput;
+
+        document.querySelectorAll('.crop-image').forEach(input => {
+            input.addEventListener('change', function (e) {
+                if (e.target.files && e.target.files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        document.getElementById('cropper-image').src = event.target.result;
+                        document.querySelector('.cropper-modal').style.display = 'flex';
+
+                        const image = document.getElementById('cropper-image');
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        cropper = new Cropper(image, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            background: true,
+                            zoomable: true,
+                            cropBoxResizable: true
+                        });
+
+                        currentInput = e.target;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+        });
+
+        document.getElementById('crop-btn').addEventListener('click', function () {
+            if (cropper) {
+                const croppedCanvas = cropper.getCroppedCanvas();
+                croppedCanvas.toBlob(blob => {
+                    const file = new File([blob], 'cropped-image.png', { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    currentInput.files = dataTransfer.files;
+
+                    document.querySelector('.cropper-modal').style.display = 'none';
+                    cropper.destroy();
+                });
+            }
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function () {
+            document.querySelector('.cropper-modal').style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+            }
+            currentInput.value = '';
+        });
+    </script>
+</body>
+</html>

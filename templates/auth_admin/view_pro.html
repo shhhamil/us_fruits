@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }}</title>
+    {% comment %} <link rel="stylesheet" href="{% static 'userr/css/styles.css' %}"> {% endcomment %}
+    
+ {% load static %}
+ <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+     <!-- Font Awesome -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ 
+     <!-- CSS Files -->
+     <link rel="stylesheet" href="{% static 'userr/css/open-iconic-bootstrap.min.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/animate.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/owl.carousel.min.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/owl.theme.default.min.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/magnific-popup.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/aos.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/ionicons.min.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/bootstrap-datepicker.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/jquery.timepicker.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/flaticon.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/icomoon.css' %}">
+     <link rel="stylesheet" href="{% static 'userr/css/style.css' %}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .product-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .main-image {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .thumbnail-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .thumbnail:hover {
+            border-color: #007bff;
+        }
+        .product-info {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .product-info p {
+            font-size: 18px;
+            margin: 8px 0;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="product-container">
+        <h1>{{ product.name }}</h1>
+
+        <!-- Main Image -->
+        {% if images %}
+            <img id="mainImage" src="{{ images.0 }}" alt="Product Image" class="main-image">
+        {% else %}
+            <img src="https://via.placeholder.com/500x400" alt="No Image Available" class="main-image">
+        {% endif %}
+
+        <!-- Thumbnails (Only Show if 3 Images Exist) -->
+        {% if images|length >= 3 %}
+        <div class="thumbnail-container">
+            {% for img in images %}
+                <img src="{{ img }}" 
+                     alt="Thumbnail {{ forloop.counter }}" 
+                     class="thumbnail" 
+                     onclick="changeMainImage('{{ img }}')">
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Product Details -->
+        <div class="product-info">
+            <p><strong>Category:</strong> {{ product.category.name }}</p>
+            <p><strong>Price:</strong> ₹{{ product.price }}</p>
+            {% if product.offer_price %}
+                <p><strong>Offer Price:</strong>₹{{ product.offer_price }}</p>
+            {% endif %}
+            <p><strong>Quantity:</strong> {{ product.quantity }} kg</p>
+            <p><strong>Stock:</strong> {{ product.stock }}</p>
+            {% if product.rating %}
+                <p><strong>Rating:</strong> {{ product.rating }} / 5</p>
+            {% endif %}
+            <p><strong>Created At:</strong> {{ product.created_at }}</p>
+            <p><strong>Updated At:</strong> {{ product.updated_at }}</p>
+            <p><strong>Active:</strong> {% if product.is_active %}Yes{% else %}No{% endif %}</p>
+            <p><strong>Deleted:</strong> {% if product.is_deleted %}Yes{% else %}No{% endif %}</p>
+        </div>
+
+        <a href="{% url 'Product' %}" class="back-btn">Back to Products</a>
+    </div>
+
+    <script>
+        function changeMainImage(imageUrl) {
+            document.getElementById('mainImage').src = imageUrl;
+        }
+    </script>
+    <script src="{% static 'adminn/js/vendors' %}"></script>
+    <script src="{% static 'adminn/js/custom-chart.js' %}"></script>
+    <script src="{% static 'adminn/js/main.js' %}"></script>
+
+</body>
+</html>

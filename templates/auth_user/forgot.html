@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bariq - Forgot Password</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .forgot-password-title {
+            font-size: 24px;
+            color: rgb(5, 69, 37);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 4px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #25a19b;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            background: rgb(9, 63, 22);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 161, 155, 0.3);
+        }
+
+        .btn:hover {
+            background: rgb(3, 87, 28);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgb(9, 84, 40);
+        }
+
+        .back-to-login {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .back-to-login a {
+            color: rgb(11, 79, 19);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-login a:hover {
+            color: rgb(4, 90, 41);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="forgot-password-title">Forgot Password</h1>
+        <form method="POST" action="{% url 'ForgotPassword' %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <label>Enter your email address</label>
+                <input type="email" name="email" placeholder="youremail@example.com" required>
+            </div>
+            <button type="submit" class="btn">Send Reset Link</button>
+        </form>
+        <div class="back-to-login">
+            Remembered your password? <a href="{% url 'Main_Login' %}">Back to Login</a>
+        </div>
+    </div>
+    
+    <!-- Show Django messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+</body>
+</html>
