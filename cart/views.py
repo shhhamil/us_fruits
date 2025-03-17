@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import F, Sum
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from user_profile.models import Address ,Wallet,WalletTransaction
+from user_profile.models import Address ,Wallet
 from auth_admin.models import Product
 import razorpay
 from decimal import Decimal
@@ -44,33 +44,26 @@ def add_to_cart(request, product_id):
     try:
         with transaction.atomic():
             cart, _ = Cart.objects.get_or_create(user=request.user)
-
-            # Get quantity from request
             try:
                 quantity = int(request.POST.get('quantity', 1))
             except ValueError:
                 return JsonResponse({'status': 'error', 'message': 'Invalid quantity'}, status=400)
 
-            # Check if product exists
             try:
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'Product not found'}, status=404)
 
-            # Quantity validation
             if quantity <= 0:
                 return JsonResponse({'status': 'error', 'message': 'Quantity must be greater than 0'}, status=400)
 
             if quantity > product.stock:
                 return JsonResponse({'status': 'error', 'message': f'Only {product.stock} items available in stock'}, status=400)
 
-            # Get the cart item if it exists, else create it
             cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
-            # ✅ Add new quantity instead of replacing it
             new_quantity = cart_item.quantity + quantity
 
-            # ✅ Ensure the total does not exceed 5
             total_items_in_cart = sum(item.quantity for item in cart.cart_items.all())
             if total_items_in_cart + quantity > 5:
                 return JsonResponse({'status': 'error', 'message': 'You can only order up to 5 products at a time.'}, status=400)
@@ -84,7 +77,6 @@ def add_to_cart(request, product_id):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': 'An error occurred while adding to cart'}, status=500)
-
 # -------------------------------------------------------------------------------------
 @require_POST
 @login_required
@@ -92,10 +84,7 @@ def update_cart(request, item_id):
     try:
         cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         action = request.POST.get('action')
-
-        # Refresh the cart_item from the database to get the latest quantity
-        cart_item.refresh_from_db()
-
+        cart_item.refresh_from_db() # Refresh the cart_item from the database to get the latest quantity
         if action == 'increase':
             if cart_item.quantity >= cart_item.product.stock:
                 return JsonResponse({
@@ -103,7 +92,6 @@ def update_cart(request, item_id):
                     'message': f'Sorry, only {cart_item.product.stock} items available in stock'
                 }, status=400)
 
-            # Check maximum limit AFTER refreshing
             if cart_item.quantity >= 5:
                 return JsonResponse({
                     'success': False,
@@ -124,7 +112,6 @@ def update_cart(request, item_id):
         cart_item.save()
         item_total = cart_item.product.offer_price * cart_item.quantity
         
-        # Calculate cart total
         cart_total = sum(item.product.offer_price * item.quantity for item in CartItem.objects.filter(cart__user=request.user))
 
         return JsonResponse({
@@ -139,8 +126,7 @@ def update_cart(request, item_id):
             'success': False,
             'message': str(e)
         }, status=400)
-
-# 0--------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 @require_POST
 @login_required
 def remove_from_cart(request, item_id):
@@ -156,9 +142,7 @@ def remove_from_cart(request, item_id):
             'success': False,
             'message': 'Cart item not found.'
         })
-
 # ------------------------------------------------------------------------------------------
-import logging
 logger = logging.getLogger(__name__)
 @login_required
 def add_address_checkout(request):
@@ -205,13 +189,9 @@ def add_address_checkout(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
-
-
-
 # ---------------------------------------------------------------------------------------------------------------
 @login_required
 def process_checkout(request):
-    """Redirects the user to the checkout page only if the cart is not empty."""
     try:
         cart = Cart.objects.get(user=request.user)   
         cart_items = CartItem.objects.filter(cart=cart)   
@@ -225,7 +205,6 @@ def process_checkout(request):
     except Cart.DoesNotExist:
         messages.error(request, "Your cart is empty. Add items before proceeding to checkout.")
         return redirect('cart')  
-
 # -------------------------------- CHECKOUT VIEW -------------------------------- #
 @login_required
 def checkout(request):
@@ -259,7 +238,6 @@ def checkout(request):
                 return redirect("Cart")
 
         with transaction.atomic():
-            # Create the order
             order = Order.objects.create(
                 user=request.user,
                 address=address,
@@ -267,8 +245,6 @@ def checkout(request):
                 shipping_cost=shipping_cost,   
                 payment_status="unpaid",
             )
-
-            # Create order items and update stock
             for cart_item in cart_items:
                 product = cart_item.product
 
@@ -282,7 +258,7 @@ def checkout(request):
                 product.stock -= cart_item.quantity
                 product.save()
 
-            # Clear the cart
+          
             cart_items.delete()
 
         messages.success(request, "Order placed successfully!")
@@ -321,19 +297,15 @@ def place_order(request):
 
         total_amount = sum(item.quantity * item.product.offer_price for item in cart_items)
         
-        # ✅ Set global shipping cost
         shipping_cost = settings.SHIPPING_COST if hasattr(settings, 'SHIPPING_COST') else 30
         total_amount += shipping_cost
 
-        # COD restriction for orders above 1000
         if payment_method == "cod" and total_amount >= 1000:
             return JsonResponse({'success': False, 'message': 'COD is not available for orders above 1000.'})
 
-        # Razorpay requires a payment ID
         if payment_method == "razorpay" and not razorpay_payment_id:
             return JsonResponse({'success': False, 'message': 'Use the "Pay with Razorpay" button instead.'})
 
-        # Wallet balance check
         if payment_method == "wallet":
             user_wallet = Wallet.objects.get(user=request.user)
             if user_wallet.balance < total_amount:
@@ -341,13 +313,11 @@ def place_order(request):
 
         payment_status = 'paid' if payment_method in ['razorpay', 'wallet'] else 'unpaid'
 
-        # ✅ **Check stock availability before creating an order**
         for item in cart_items:
             if item.product.stock < item.quantity:
                 return JsonResponse({'success': False, 'message': f'Not enough stock for {item.product.name}.'})
 
         with transaction.atomic():
-            # Create the order
             order = Order.objects.create(
                 user=request.user,
                 address=Address.objects.get(id=address_id),
@@ -360,12 +330,10 @@ def place_order(request):
             if payment_method == "razorpay":
                 order.razorpay_payment_id = razorpay_payment_id
 
-            # Deduct from wallet balance if paying via wallet
             if payment_method == "wallet":
                 user_wallet.balance -= total_amount
                 user_wallet.save()
 
-            # Create Order Items and update stock
             for item in cart_items:
                 product = item.product
                 OrderItem.objects.create(
@@ -377,7 +345,7 @@ def place_order(request):
                 product.stock -= item.quantity
                 product.save()
 
-            # Clear the cart
+            
             cart_items.delete()
             order.save()
 
@@ -385,12 +353,12 @@ def place_order(request):
 
     except Exception as e:
         import traceback
-        traceback.print_exc()  # Print full error details in the console
+        traceback.print_exc()  
         return JsonResponse({'success': False, 'message': f'Failed to process order: {str(e)}'})
+
 # ---------------------------- RAZORPAY ORDER CREATION ---------------------------- #
 @csrf_exempt
 def create_order(request):
-    """Creates a Razorpay order and returns the order ID."""
     if request.method == "POST":
         try:
             amount_str = request.POST.get("amount")
@@ -398,7 +366,7 @@ def create_order(request):
                 return JsonResponse({"error": "Amount is required"}, status=400)
 
             try:
-                amount = int(Decimal(amount_str) * 100)  # Convert to paise
+                amount = int(Decimal(amount_str) * 100) 
             except ValueError:
                 return JsonResponse({"error": "Invalid amount format"}, status=400)
             client = razorpay.Client(auth=(settings.R_ID, settings.R_SECRET))
@@ -418,7 +386,6 @@ def create_order(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 # ------------------------ PLACE ORDER WITH WALLET PAYMENT ------------------------ #
 def get_cart_total(user):
@@ -441,13 +408,11 @@ def place_order_with_wallet(request):
         if payment_method != "wallet":
             return JsonResponse({"success": False, "message": "Invalid payment method!"})
 
-        # Get user's wallet
         try:
             wallet = Wallet.objects.get(user=user)
         except Wallet.DoesNotExist:
             return JsonResponse({"success": False, "message": "Wallet not found!"})
 
-        # Fetch the total cart amount
         total_amount = get_cart_total(user)
 
         if total_amount <= 0:
@@ -456,14 +421,11 @@ def place_order_with_wallet(request):
         if wallet.balance < total_amount:
             return JsonResponse({"success": False, "message": "Insufficient wallet balance!"})
 
-        # Atomic transaction to ensure data consistency
         try:
             with transaction.atomic():
-                # Deduct wallet balance
                 wallet.balance -= total_amount
                 wallet.save()
 
-                # Create order
                 order = Order.objects.create(
                     user=user,
                     address_id=address_id,
@@ -472,7 +434,6 @@ def place_order_with_wallet(request):
                     status="Paid"
                 )
 
-                # Clear the cart after order is placed
                 Cart.objects.filter(user=user).delete()
 
             return JsonResponse({"success": True, "redirect_url": "/order-success/"})

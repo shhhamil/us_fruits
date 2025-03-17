@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from decimal import Decimal
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
@@ -11,7 +12,7 @@ from .models import Category, Product,OrderItem
 from .models import CustomUser
 from django.contrib import messages
 from .models import Order
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from datetime import datetime, timedelta
 from django.db.models import Q
 from django.views.decorators.http import require_POST
@@ -83,13 +84,12 @@ def Category_Manegement(request):
     context = {'categories': categories_page, 'total_categories': categories.count(), 'search_term': search}
     return render(request, 'auth_admin/category.html', context)
 # _______________________________________________________________________________________________________________
-#==================================== Add Category===============================================================
+# ================================= Add Category =============================================================
 def add_category(request):
     if request.method == "POST":
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
-        discount = request.POST.get('discount', '').strip()  
-
+        discount = request.POST.get('discount', '').strip()
 
         if not name:
             messages.error(request, "Category name is required!")
@@ -101,7 +101,7 @@ def add_category(request):
 
         if discount:
             try:
-                discount = float(discount)
+                discount = Decimal(discount) 
                 if discount < 0 or discount > 100:
                     messages.error(request, "Discount must be between 0 and 100!")
                     return redirect('Add_Category')
@@ -109,28 +109,29 @@ def add_category(request):
                 messages.error(request, "Invalid discount value!")
                 return redirect('Add_Category')
         else:
-            discount = 0   
-
+            discount = Decimal(0)  
         if Category.objects.filter(name__iexact=name).exists():
             messages.error(request, "Category already exists!")
             return redirect('Add_Category')
 
-        
-        Category.objects.create(name=name, description=description, discount_percentage=discount)
+        Category.objects.create(
+            name=name,
+            description=description,
+            discount_percentage=discount
+        )
         messages.success(request, "Category added successfully!")
-        return redirect('Category')  
+        return redirect('Category')
 
     categories = Category.objects.all()  
     return render(request, 'auth_admin/add_cate.html', {"categories": categories})
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ============================== Edit Category ===============================================================
 def edit_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
 
     if request.method == "POST":
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
-        discount = request.POST.get('discount', '').strip() 
+        discount = request.POST.get('discount', '').strip()
 
         if not name:
             messages.error(request, "Category name is required!")
@@ -142,7 +143,7 @@ def edit_category(request, category_id):
 
         if discount:
             try:
-                discount = float(discount)
+                discount = Decimal(discount) 
                 if discount < 0 or discount > 100:
                     messages.error(request, "Discount must be between 0 and 100!")
                     return redirect('Edit_Category', category_id=category.id)
@@ -150,24 +151,21 @@ def edit_category(request, category_id):
                 messages.error(request, "Invalid discount value!")
                 return redirect('Edit_Category', category_id=category.id)
         else:
-            discount = category.discount_percentage  
+            discount = category.discount_percentage   
 
-        
         if Category.objects.filter(name__iexact=name).exclude(id=category.id).exists():
             messages.error(request, "Category with this name already exists!")
             return redirect('Edit_Category', category_id=category.id)
 
-       
         category.name = name
         category.description = description
-        category.discount_percentage = discount  
+        category.discount_percentage = discount
         category.save()
 
         messages.success(request, "Category updated successfully!")
-        return redirect('Category')  
+        return redirect('Category')
 
     return render(request, 'auth_admin/edit_cate.html', {'category': category})
-# ______________________________________________________________________________________________________________
 # --------------------------------------Delete Category---------------------------------------------------------
 def soft_delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
@@ -181,7 +179,6 @@ def soft_delete_category(request, category_id):
 
     category.save()
     return redirect('Category')
-
 # _______________________________________________________________________________________________________________
 # ----------------------------------------PRODUCT VIEWS----------------------------------------------------------
 def Product_Management(request):
@@ -206,9 +203,7 @@ def Product_Management(request):
         'search_term': search
     }
     return render(request, 'auth_admin/product.html', context)
-
-# ==========================================================================++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# -------------------------------------View to add a new product----------------------------------------
+# -------------------------------------View to add a new product-------------------------------------------------
 def add_product(request):
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -217,15 +212,15 @@ def add_product(request):
         offer_percentage = request.POST.get('offer_percentage', 0)
         stock = request.POST.get('stock')
         is_active = request.POST.get('is_active') == 'on'
-        description = request.POST.get('description', '').strip()  
+        description = request.POST.get('description', '').strip()
         photo_1 = request.FILES.get('photo_1')
         photo_2 = request.FILES.get('photo_2')
         photo_3 = request.FILES.get('photo_3')
 
         try:
-            price = float(price)
+            price = Decimal(price)  
             stock = int(stock)
-            offer_percentage = float(offer_percentage)
+            offer_percentage = Decimal(offer_percentage)   
         except ValueError:
             messages.error(request, "Invalid price, stock, or discount value!")
             return redirect('add_product')
@@ -252,11 +247,10 @@ def add_product(request):
             messages.error(request, "At least one photo is required!")
             return redirect('add_product')
 
-       
         category = get_object_or_404(Category, id=category_id)
 
-        
-        offer_price = round(price - (price * offer_percentage / 100), 2)
+        offer_price = price - (price * (offer_percentage / Decimal(100)))
+        offer_price = offer_price.quantize(Decimal('0.01'))  
 
         try:
             Product.objects.create(
@@ -267,7 +261,7 @@ def add_product(request):
                 offer_price=offer_price,
                 stock=stock,
                 is_active=is_active,
-                description=description,   
+                description=description,
                 photo_1=photo_1,
                 photo_2=photo_2,
                 photo_3=photo_3
@@ -280,12 +274,11 @@ def add_product(request):
 
     categories = Category.objects.all()
     return render(request, 'auth_admin/add_pro.html', {'categories': categories})
-#_____________________________________________________________________________________________________________________________________
-#------------------------------------------ View to edit an existing product----------------------------------------------------------
+# ---------------- ---------------------------Edit Product View ------------------------------------------------
 def edit_product(request, pk):
     product = get_object_or_404(Product, id=pk)
     categories = Category.objects.all()
-    
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         category_id = request.POST.get('category')
@@ -293,20 +286,19 @@ def edit_product(request, pk):
         offer_percentage = request.POST.get('offer_percentage', 0)
         stock = request.POST.get('stock')
         is_active = request.POST.get('is_active') == 'on'
-        description = request.POST.get('description', '').strip()  
+        description = request.POST.get('description', '').strip()
         photo_1 = request.FILES.get('photo_1')
         photo_2 = request.FILES.get('photo_2')
         photo_3 = request.FILES.get('photo_3')
- 
+
         try:
-            price = float(price)
+            price = Decimal(price) 
             stock = int(stock)
-            offer_percentage = float(offer_percentage)
+            offer_percentage = Decimal(offer_percentage)   
         except ValueError:
             messages.error(request, "Invalid price, stock, or discount value!")
             return redirect('Edit_Product', pk=pk)
 
- 
         if not name:
             messages.error(request, "Product name is required!")
             return redirect('Edit_Product', pk=pk)
@@ -326,21 +318,21 @@ def edit_product(request, pk):
             messages.error(request, "Stock cannot be negative!")
             return redirect('Edit_Product', pk=pk)
 
- 
         category = get_object_or_404(Category, id=category_id)
 
         try:
- 
             product.name = name
             product.category = category
             product.price = price
             product.offer_percentage = offer_percentage
             product.stock = stock
             product.is_active = is_active
-            product.description = description   
-            product.offer_price = round(price - (price * offer_percentage / 100), 2)
+            product.description = description
 
- 
+           
+            product.offer_price = price - (price * (offer_percentage / Decimal(100)))
+            product.offer_price = product.offer_price.quantize(Decimal('0.01'))
+
             if photo_1:
                 product.photo_1 = photo_1
             if photo_2:
@@ -351,11 +343,11 @@ def edit_product(request, pk):
             product.save()
             messages.success(request, "Product updated successfully!")
             return redirect('Product')
-            
+
         except Exception as e:
             messages.error(request, f"Error updating product: {str(e)}")
             return redirect('Edit_Product', pk=pk)
-    
+
     return render(request, 'auth_admin/edit_pro.html', {'product': product, 'categories': categories})
 # ________________________________________________________________________________________________________________________________
 #------------------------------------------ View to see the details of a product---------------------------------------------------
@@ -371,7 +363,6 @@ def view_product(request, pk):
         'images': images,
         'final_price': final_price,  
     })
-# ___________________________________________________________________________________________________________________________________-___
 # -------------------------View to soft delete a product--------------------------------------------------------------------------------
 def soft_delete_product(request, pk):
     product = get_object_or_404(Product, id=pk)
@@ -382,14 +373,12 @@ def soft_delete_product(request, pk):
     else:
         messages.success(request, "Product disabled successfully!")
     return redirect('Product')
-
 # ______________________________________________________________________________________________________________________________
-# -------------------------------------------------user--------------------------------------------------------------------------
+# -------------------------------------------------User Managment --------------------------------------------------------------------------
 login_required
 def user_management(request):
     page = request.GET.get('page', 1)  
     search = request.GET.get('search', '').strip()
-
 #------------ Search users by email or username and exclude soft-deleted users--------------------------------------
     users = CustomUser.objects.filter(
         Q(username__icontains=search) | Q(email__icontains=search),
@@ -410,8 +399,6 @@ def user_management(request):
         'search_term': search  
     }
     return render(request, 'auth_admin/user.html', context)
-
-# __________________________________________________________________________________________________________________________
 # -------------------------------------------Block User------------------------------------------------------------------------------
 def block_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
@@ -428,11 +415,11 @@ def block_user(request, user_id):
     
     return redirect("User_Management")
 # ---------------------------------------------------------------------------------------------------------------------------------
-# _________________________________________Order vews______________________________________________________________________
+# _________________________________________Order Views______________________________________________________________________
 def order_management(request):
     status_filter = request.GET.get('status', 'all').strip().lower()
 
-    # ---------------------Filter orders based on status-----------------------------
+    # --------------------- Filter orders based on status -----------------------------
     orders = Order.objects.all().order_by('-date_of_order')
 
     if status_filter in dict(Order.STATUS_CHOICES): 
@@ -443,17 +430,20 @@ def order_management(request):
 
     try:
         orders_page = paginator.page(page)
-    except (PageNotAnInteger, ValueError):
+    except PageNotAnInteger:
         orders_page = paginator.page(1) 
     except EmptyPage:
-        orders_page = paginator.page(paginator.num_pages) 
+        orders_page = paginator.page(paginator.num_pages)  
 
-    total_price = orders.aggregate(Sum('total'))['total__sum'] or 0
+     
+    total_orders = paginator.count  
+
+    total_price = orders.aggregate(Sum('total'))['total__sum'] or 0  
 
     context = {
         'orders': orders_page,
         'current_status': status_filter,
-        'total_orders': orders.count(),
+        'total_orders': total_orders,  
         'total_price': total_price,
     }
     return render(request, 'auth_admin/order.html', context)
@@ -462,32 +452,37 @@ def order_management(request):
 @login_required
 @require_POST
 def update_order_status(request, orderId):
-    try:            
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'User not authenticated!'}, status=401)
+
+    try:
         data = json.loads(request.body)
         new_status = data.get('status', '').strip().lower()
 
         order = get_object_or_404(Order, id=orderId)
-
-        # Validate Order Status
         valid_statuses = ["pending", "shipped", "delivered", "cancelled"]
+
         if new_status not in valid_statuses:
             return JsonResponse({'success': False, 'message': 'Invalid order status!'}, status=400)
 
-        # Update order status
         order.status = new_status
-
-        # ✅ Automatically update payment status to 'paid' if delivered
         if new_status == "delivered":
             order.payment_status = "paid"
 
         order.save()
 
-        return JsonResponse({'success': True, 'order_status': order.status, 'payment_status': order.payment_status})
+        return JsonResponse({
+            'success': True,
+            'order_status': order.status,
+            'payment_status': order.payment_status
+        })
+
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'Invalid JSON data!'}, status=400)
+
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
-# # -----------------------------------------------------------------------------------
+#  -----------------------------this for getting all user detials------------------------------------------------------
 def get_order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     total_amount = sum(item.product.offer_price * item.quantity for item in order.items.all()) + 30
@@ -496,7 +491,8 @@ def get_order_details(request, order_id):
         "id": order.id,
         "created_at": order.date_of_order.strftime("%b %d, %Y"),
         "status": order.status,
-        "payment_method": order.payment_status,
+        "payment_status":order.payment_status,
+        "payment_method": order.payment_method,
         "total_amount": total_amount,  
         "address": {
             "street": order.address.street if order.address else "N/A",
@@ -515,9 +511,8 @@ def get_order_details(request, order_id):
             for item in order.items.all()
         ]
     }
-    print(f"---------------------{order_data}")
     return JsonResponse(order_data)
-# -----------------------------------------------------------------------------------------------------
+# --------------------------------------sales report---------------------------------------------------------------
 @login_required
 def sales_report(request):
     period = request.GET.get('period', 'all')
@@ -554,14 +549,8 @@ def sales_report(request):
     total_sales = orders.aggregate(total=Sum('total'))['total'] or 0
     total_orders = orders.count()
     total_products_sold = OrderItem.objects.filter(order__in=orders).aggregate(total=Sum('quantity'))['total'] or 0
-
-
-    
     completed_orders = orders.filter(status='delivered').count()
-    cancelled_orders = orders.filter(status='cancelled').count()
-
-
-    
+    cancelled_orders = orders.filter(status='cancelled').count()   
     
     stats = {
         'total_sales': total_sales,
@@ -583,7 +572,7 @@ def sales_report(request):
     }
     
     return render(request, 'auth_admin/sales.html', context)
-# ---------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------pdf of sales report-------------------------------------------------------
 @login_required
 def export_sales_pdf(request):
     response = HttpResponse(content_type='application/pdf')
@@ -620,7 +609,7 @@ def export_sales_pdf(request):
     buffer.close()
     response.write(pdf)
     return response
-# ------------------------------------------------------------------------------------
+# ------------------------------------------exel sheet of sales report------------------------------------------
 @login_required
 def export_sales_excel(request):
     wb = Workbook()
@@ -643,7 +632,7 @@ def export_sales_excel(request):
     response['Content-Disposition'] = f'attachment; filename="sales_report_{datetime.now().strftime("%Y%m%d")}.xlsx"'
     wb.save(response)
     return response
-# ----------------------------------------------------------------------------------------------
+# ---------------------------------------filter recored ------------------------------------------------------
 @login_required
 def filter_sales(request, period):
     today = datetime.today()
@@ -663,7 +652,7 @@ def filter_sales(request, period):
         return render(request, 'sales/dashboard.html', {'error': 'Invalid period'})
     orders = Order.objects.filter(date_of_order__range=[start_date, end_date])
     return render(request, 'auth_admin/sales.html', {'orders': orders})
-# -------------------------------------------------------------------------
+# -------------------------------custom date filtering------------------------------------------------------
 @login_required
 def filter_custom_date(request):
     start_date = request.GET.get('start_date')

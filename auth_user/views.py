@@ -1,23 +1,19 @@
 # -------------------------------------------Imported items --------------------------------------------------
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from django.utils.timezone import now
-from django.db.models import F, ExpressionWrapper, FloatField
 from datetime import timedelta
-from django.contrib.auth.decorators import login_required
 import re
-from django.db.models import Q
 from django.conf import settings
 from django.core.paginator import Paginator
 import random
 from auth_admin.models import Product
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.timezone import now
 from django.utils.dateparse import parse_datetime
@@ -41,23 +37,15 @@ User = get_user_model()
 @never_cache
 def Home(request):    
     products = Product.objects.filter(is_active=True).order_by('name')
-
-    # Calculate the maximum discount for each product before sending it to the template
     for product in products:
         product.max_discount = max(product.offer_percentage, product.category.discount_percentage)
-
-    # Filter products with offer price ≤ 111
     offer_price = [p for p in products if p.offer_price <= 111]
-
-    # Paginate results
     paginator = Paginator(offer_price, 6)  
     page_number = request.GET.get('page', 1)  
     products = paginator.get_page(page_number)
 
     context = {'products': products}  
     return render(request, 'auth_user/home.html', context)
-
-
 #--------------------------------------------Main_Login-------------------------------------------------------
 @never_cache
 def Main_Login(request):
@@ -80,7 +68,6 @@ def Main_Login(request):
             return redirect('Main_Login')
     
     return render(request, 'auth_user/main_login.html')
-
 #------------------------------------------SIGNUP VIWES-------------------------------------------------------
 @never_cache
 def signup(request):
@@ -173,12 +160,10 @@ def otp(request):
             return redirect('Otp')
 
     return render(request, 'auth_user/otp.html')
-
 # ----------------------------------------------resent otp----------------------------------------------------
 @never_cache
 def resend_otp(request):
-    otp_type = request.session.get('otp_type')  # Identify whether it's signup or forgot password
-
+    otp_type = request.session.get('otp_type') 
     if otp_type == 'forgot_password':
         email = request.session.get('reset_email')
         if not email:
@@ -191,9 +176,9 @@ def resend_otp(request):
         request.session['reset_otp'] = str(otp)
         request.session['reset_otp_expiry'] = otp_expiry.isoformat()
 
-        send_otp_email(email, otp)  # Use the helper function for email
+        send_otp_email(email, otp) 
         messages.success(request, "A new OTP has been sent to your email.")
-        return redirect('Otp')  # Redirect to forgot password OTP page
+        return redirect('Otp') 
 
     elif otp_type == 'signup':
         email = request.session.get('email')
@@ -216,7 +201,7 @@ def resend_otp(request):
         )
 
         messages.success(request, 'A new OTP has been sent to your email.')
-        return redirect('Otp')  # Redirect to signup OTP verification page
+        return redirect('Otp') 
 
     else:
         messages.error(request, 'Invalid OTP request. Please try again.')
@@ -255,7 +240,7 @@ def forgot_password(request):
         return redirect('Otp')
     return render(request, 'auth_user/forgot.html')
 def send_otp_email(email, otp):
-    """ Sends OTP email for password reset. """
+#     Sends OTP email for password reset.
     subject = "Your Password Reset OTP"
     message = f"Your OTP for password reset is {otp}. It is valid for 10 minutes."
     from_email = settings.EMAIL_HOST_USER

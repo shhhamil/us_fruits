@@ -205,7 +205,6 @@
     .summary-row.total {
       border-top: 2px solid #ddd;
           border-bottom: none;
-          {% comment %} margin-top: 15px; {% endcomment %}
           padding-top: 20px;
           font-weight: 600;
           font-size: 1.25rem;
@@ -598,8 +597,8 @@
             notification.removeClass('show');
             setTimeout(() => {
                 notification.css('display', 'none');
-            }, 300);
-        }, 3000);
+            }, 200);
+        }, 2000);
     }
 
     $(document).ready(function() {

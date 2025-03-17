@@ -9,13 +9,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from django.db import transaction
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
-from decimal import Decimal 
 from .models import Address
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from auth_admin.models import Order, OrderItem
-from django.contrib import messages
 from django.http import JsonResponse
 from auth_admin.models import Order
 import json
@@ -55,7 +52,6 @@ def change_password(request):
         update_session_auth_hash(request, user)
         return render(request, "user_profile/password.html", {"success": "Password changed successfully"})
     return render(request, "user_profile/password.html")
-# ---------------------------------------------------------------------------------------
 # ________________________________________________________________________________________________________________________
 # ------------------ LIST ADDRESSES VIEW ------------------
 @login_required
@@ -134,8 +130,6 @@ def delete_address(request, address_id):
         user = request.user
         try:
             address = Address.objects.get(id=address_id, user=user)
-
-            # Prevent deletion if the address is linked to pending/shipped orders
             if Order.objects.filter(address=address, status__in=['pending', 'shipped']).exists():
                 return JsonResponse({"success": False, "message": "You cannot delete this address while an order is pending or shipped."}, status=400)
 
@@ -162,25 +156,41 @@ def set_default_address(request, address_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 # --------------------------------------------------------------------------------------------------------------
+@login_required
 def order_history(request):
     if request.user.is_authenticated:
-        orders = Order.objects.filter(user=request.user).order_by('-id')
+        orders = Order.objects.filter(user=request.user).order_by('-id').select_related('user')
 
         subtotal = 0
+        orders_data = []
+        
         for order in orders:
-            order.total_price = sum(item.product.price * item.quantity for item in order.items.all())
-            subtotal += order.total_price   
+            total_price = sum(item.product.price * item.quantity for item in order.items.all())
+            subtotal += total_price   
+
+            orders_data.append({
+                'id': order.id,
+                'date_of_order': order.date_of_order.strftime("%b %d, %Y"),
+                'status': order.status,
+                'payment_status': order.payment_status,  
+                'payment_method': order.payment_method,
+                'total_price': total_price,
+                'items': order.items.all(),
+            })
 
         shipping_cost = 30   
         total_amount = subtotal + shipping_cost
 
+
         return render(request, 'user_profile/order_history.html', {
-            'orders': orders,
+            'orders': orders_data, 
             'subtotal': subtotal,
             'total_amount': total_amount
         })
+    
     else:
         return redirect('Main_Login')
+
 # --------------------------------------------------------------------------------------
 @login_required
 def cancel_order(request, order_id):
@@ -196,18 +206,15 @@ def cancel_order(request, order_id):
                 }, status=400)
 
             with transaction.atomic():
-                # Increase product stock for each item in the order
                 for item in order.items.all():
                     item.product.stock += item.quantity
                     item.product.save()
 
-                # Refund to wallet if paid by wallet
-                if order.payment_status == "wallet":
+                if order.payment_method == "wallet":
                     user_wallet, created = Wallet.objects.get_or_create(user=request.user)
                     user_wallet.balance += order.total_amount
                     user_wallet.save()
 
-                # Update order status
                 order.status = Order.STATUS_CANCELLED
                 order.cancellation_reason = data.get('reason', 'No reason provided')
                 order.cancelled_at = timezone.now()

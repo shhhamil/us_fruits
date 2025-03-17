@@ -703,107 +703,163 @@
     </main>
 
     <!-- Add Order Details Modal -->
-    <div id="orderModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Order Details</h2>
-                <button class="modal-close" onclick="closeOrderModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="order-details">
-                    <div class="detail-section">
-                        <h3>Order Information</h3>
-                        <div class="detail-item">
-                            <span class="detail-label">Order ID:</span>
-                            <span id="modalOrderId"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Order Date:</span>
-                            <span id="modalOrderDate"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Status:</span>
-                            <span id="modalOrderStatus"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Payment Status:</span>
-                            <span id="modalPaymentStatus"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Total Amount:</span>
-                            <span id="modalTotalAmount"></span>
-                        </div>
-
-                        
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Order Details</h2>
+            <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-details">
+                <!-- Order Information -->
+                <div class="detail-section">
+                    <h3>Order Information</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Order ID:</span>
+                        <span id="modalOrderId"></span>
                     </div>
-                    
-                    <div class="detail-section">
-                        <h3>Shipping Address</h3>
-                        <div class="detail-item">
-                            <span class="detail-label">Street:</span>
-                            <span id="modalStreet"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">City:</span>
-                            <span id="modalCity"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">State:</span>
-                            <span id="modalState"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">PIN Code:</span>
-                            <span id="modalPinCode"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Phone:</span>
-                            <span id="modalPhone"></span>
-                        </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Order Date:</span>
+                        <span id="modalOrderDate"></span>
                     </div>
-
-                  
+                    <div class="detail-item">
+                        <span class="detail-label">Order Status:</span>
+                        <span id="modalOrderStatus"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Status:</span>
+                        <span id="modalPaymentStatus"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Method:</span>
+                        <span id="modalOrderMethod"></span>   
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total Amount:</span>
+                        <span id="modalTotalAmount"></span>
+                    </div>
                 </div>
-
-                <div class="detail-section mt-4">
-                    <h3>Order Items</h3>
-                    <div id="modalOrderItems" class="product-list">
-                        <!-- Order items will be populated here -->
+                
+                <!-- Shipping Address -->
+                <div class="detail-section">
+                    <h3>Shipping Address</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Street:</span>
+                        <span id="modalStreet"></span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">City:</span>
+                        <span id="modalCity"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">State:</span>
+                        <span id="modalState"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">PIN Code:</span>
+                        <span id="modalPinCode"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone:</span>
+                        <span id="modalPhone"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="detail-section mt-4">
+                <h3>Order Items</h3>
+                <div id="modalOrderItems" class="product-list">
+                    <!-- Order items will be populated here -->
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 
         <script>
-            // Sidebar Toggle
-            document.querySelector('.toggle-btn').addEventListener('click', function () {
-                document.querySelector('.sidebar').classList.toggle('collapsed');
-                document.querySelector('.main-wrap').classList.toggle('expanded');
-            });
-        
-            // Profile Dropdown Toggle
-            function toggleDropdown() {
-                const dropdown = document.getElementById('profileDropdown');
-                dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
-            }
-        
-            // Filter functionality
-            document.querySelector('.filter-select').addEventListener('change', function(e) {
-                const filterValue = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-                
-                rows.forEach(row => {
-                    const status = row.querySelector('.status-badge')?.textContent.toLowerCase() || '';
-                    row.style.display = !filterValue || status.includes(filterValue) ? '' : 'none';
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log("DOM fully loaded and parsed.");
+            
+                // Sidebar Toggle
+                document.querySelector('.toggle-btn').addEventListener('click', function () {
+                    document.querySelector('.sidebar').classList.toggle('collapsed');
+                    document.querySelector('.main-wrap').classList.toggle('expanded');
+                });
+            
+                // Profile Dropdown Toggle
+                window.toggleDropdown = function () {
+                    const dropdown = document.getElementById('profileDropdown');
+                    dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
+                };
+            
+                // Filter functionality
+                document.querySelector('.filter-select').addEventListener('change', function (e) {
+                    const filterValue = e.target.value.toLowerCase();
+                    document.querySelectorAll('tbody tr').forEach(row => {
+                        const status = row.querySelector('.status-badge')?.textContent.toLowerCase() || '';
+                        row.style.display = !filterValue || status.includes(filterValue) ? '' : 'none';
+                    });
+                });
+            
+                // Order Status Update + Convert to Text
+                document.querySelectorAll('.order-status-dropdown').forEach(dropdown => {
+                    dropdown.addEventListener('change', function () {
+                        const orderId = this.dataset.orderId;
+                        const newStatus = this.value;
+            
+                        fetch(`/order/${orderId}/update-status/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ order_id: orderId, status: newStatus })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Order status updated successfully!', 'success');
+            
+                                // Convert dropdown to text if status is "Delivered" or "Cancelled"
+                                if (newStatus === "delivered" || newStatus === "cancelled") {
+                                    let textElement = document.createElement("span");
+                                    textElement.textContent = capitalizeFirstLetter(newStatus);
+                                    textElement.classList.add("fw-bold");
+                                    this.replaceWith(textElement);
+                                }
+                            } else {
+                                alert(data.message || 'Failed to update status', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to update status. Please try again.', 'error');
+                        });
+                    });
+                });
+            
+                // Convert dropdown to text on page load if already "Delivered" or "Cancelled"
+                document.querySelectorAll(".order-status-dropdown").forEach(select => {
+                    if (select.value === "delivered" || select.value === "cancelled") {
+                        let textElement = document.createElement("span");
+                        textElement.textContent = capitalizeFirstLetter(select.value);
+                        textElement.classList.add("fw-bold");
+                        select.replaceWith(textElement);
+                    }
                 });
             });
-        
-            function showOrderDetails(orderId) {
+            
+            // ✅ Global function to show order details
+            window.showOrderDetails = function (orderId) {
                 console.log('Fetching order details for ID:', orderId);
                 const modal = document.getElementById('orderModal');
                 modal.style.display = 'block';
+            
+                // Show loading indicator in modal
                 document.getElementById('modalOrderItems').innerHTML = '<div class="text-center">Loading...</div>';
+            
                 fetch(`/order/details/${orderId}/`, {
                     method: 'GET',
                     headers: {
@@ -812,29 +868,26 @@
                     }
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
                     console.log('Received data:', data);
-                    
-                     // Update order information
-                        document.getElementById('modalOrderId').textContent = `#${data.id}`;
-                        document.getElementById('modalOrderDate').textContent = data.created_at;
-                        document.getElementById('modalTotalAmount').textContent = `₹${data.total_amount}`;
-                            // ✅ Show Order Status
-                        document.getElementById('modalOrderStatus').textContent = capitalizeFirstLetter(data.status);
-
-          \
-                         // ✅ Show Order Method (e.g., COD or Online Payment)
-                        document.getElementById('modalOrderMethod').textContent = capitalizeFirstLetter(data.order_method);
-
-                        // ✅ Show Payment Method (e.g., Cash, UPI, Credit Card)
-                        document.getElementById('modalPaymentMethod').textContent = capitalizeFirstLetter(data.payment_method);
-
-                    // Update shipping address
+            
+                    if (!document.getElementById('modalOrderId')) {
+                        console.error("Error: Modal elements not found in DOM.");
+                        return;
+                    }
+            
+                    // ✅ Update Order Details
+                    document.getElementById('modalOrderId').textContent = `#${data.id}`;
+                    document.getElementById('modalOrderDate').textContent = data.created_at;
+                    document.getElementById('modalTotalAmount').textContent = `₹${data.total_amount}`;
+                    document.getElementById('modalOrderStatus').textContent = capitalizeFirstLetter(data.status);
+                    document.getElementById('modalPaymentStatus').textContent = capitalizeFirstLetter(data.payment_status);
+                    document.getElementById('modalOrderMethod').textContent = capitalizeFirstLetter(data.payment_method);
+            
+                    // ✅ Update Shipping Address
                     if (data.address) {
                         document.getElementById('modalStreet').textContent = data.address.street || 'N/A';
                         document.getElementById('modalCity').textContent = data.address.city || 'N/A';
@@ -842,8 +895,8 @@
                         document.getElementById('modalPinCode').textContent = data.address.pin_code || 'N/A';
                         document.getElementById('modalPhone').textContent = data.address.phone || 'N/A';
                     }
-                    
-                    // Update order items
+            
+                    // ✅ Update Order Items
                     const orderItemsContainer = document.getElementById('modalOrderItems');
                     if (data.items && data.items.length > 0) {
                         orderItemsContainer.innerHTML = data.items.map(item => `
@@ -852,6 +905,7 @@
                                 <div>
                                     <div class="detail-label">${item.product_name}</div>
                                     <div>Quantity: ${item.quantity}</div>
+                                    <div>Price: ₹${item.price}</div>
                                 </div>
                             </div>
                         `).join('');
@@ -864,73 +918,25 @@
                     alert('Failed to load order details. Please try again.');
                     closeOrderModal();
                 });
-            }
-        
-            function closeOrderModal() {
+            };
+            
+            // ✅ Global function to close modal
+            window.closeOrderModal = function () {
                 document.getElementById('orderModal').style.display = 'none';
-            }
-        
-            // Close modal when clicking outside
-            window.onclick = function(event) {
-                const modal = document.getElementById('orderModal');
-                if (event.target == modal) {
+            };
+            
+            // ✅ Close modal when clicking outside
+            window.onclick = function (event) {
+                if (event.target == document.getElementById('orderModal')) {
                     closeOrderModal();
                 }
             };
-        
-            // Order Status Update + Convert to Text
-            document.querySelectorAll('.order-status-dropdown').forEach(dropdown => {
-                dropdown.addEventListener('change', function() {
-                    const orderId = this.dataset.orderId;
-                    const newStatus = this.value;
-                  
-                    fetch(`/order/${orderId}/update-status/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },        
-                        body: JSON.stringify({
-                            order_id: orderId,
-                            status: newStatus
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Order status updated successfully!', 'success');
-        
-                            // If "Delivered" or "Cancelled" is selected, replace dropdown with text
-                            if (newStatus === "delivered" || newStatus === "cancelled") {
-                                let textElement = document.createElement("span");
-                                textElement.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1); // Capitalize first letter
-                                textElement.classList.add("fw-bold"); // Optional styling
-        
-                                this.replaceWith(textElement); // Replace dropdown with text
-                            }
-                        } else {
-                            alert(data.message || 'Failed to update status', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to update status. Please try again.', 'error');
-                    });
-                });
-            });
-        
-            // Convert dropdown to text on page load if already "Delivered" or "Cancelled"
-            document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".order-status-dropdown").forEach(select => {
-                    if (select.value === "delivered" || select.value === "cancelled") {
-                        let textElement = document.createElement("span");
-                        textElement.textContent = select.value.charAt(0).toUpperCase() + select.value.slice(1);
-                        textElement.classList.add("fw-bold"); // Optional styling
-                        select.replaceWith(textElement);
-                    }
-                });
-            });
-        
+            
+            // ✅ Capitalize first letter function
+            function capitalizeFirstLetter(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+            
     </script>
 </body>
 </html>

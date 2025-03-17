@@ -5,15 +5,13 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.db.models import F, Max ,DecimalField
+from django.db.models.functions import Greatest
 from django.core.paginator import Paginator
 # ----------------------------------------------------------------------------------------------
-from django.db.models import F, Value , Max ,DecimalField
-from django.db.models.functions import Greatest
-
 def shop(request):
     products = Product.objects.filter(is_active=True).select_related('category')
     
-    # Annotate max discount
     products = Product.objects.filter(is_active=True).select_related('category').annotate(
         max_discount=Greatest(
             F('offer_percentage'), 
@@ -74,8 +72,7 @@ def shop(request):
 
     return render(request, 'shop/shop.html', context)
 
-
-# ___________________________________-___________________-____________________-----_________________________________________________
+# ___________________________________________________________________________________________________________________________
 def single_product(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
 
@@ -83,10 +80,8 @@ def single_product(request, product_id):
         category=product.category, is_active=True
     ).exclude(id=product_id)[:4]
 
-    # Calculate max discount for the main product
     product.max_discount = max(product.offer_percentage or 0, product.category.discount_percentage or 0)
 
-    # Calculate max discount for each related product
     for p in related_products:
         p.max_discount = max(p.offer_percentage or 0, p.category.discount_percentage or 0)
 
@@ -94,7 +89,6 @@ def single_product(request, product_id):
         'product': product,
         'related_products': related_products,
     })
-
 
 # --------------------------------------------------------------------------------------------------------------
 def check_authentication(request):

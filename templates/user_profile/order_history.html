@@ -1229,7 +1229,7 @@
                             <th>Products</th>
                             <th>Order Date</th>
                             <th>Order Status</th>
-                            <th>Payment</th>
+                            <th>Payment Method</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -1253,15 +1253,15 @@
                                 </div>
                             </td>
                     
-                            <td class="date-cell">{{ order.date_of_order|date:"M d, Y" }}</td>
+                            <td class="date-cell">{{ order.date_of_order }}</td>
                             <td class="status-cell">
                                 <span class="status-badge {{ order.status|lower }}">
                                     {{ order.status }}
                                 </span>
                             </td>
                             <td class="payment-cell">
-                                <span class="payment-badge {{ order.payment_status|lower }}">
-                                    {{ order.payment_status }}
+                                <span class="payment-badge {{ order.payment_method|lower }}">
+                                    {{ order.payment_method }}
                                 </span>
                             </td>
                             <td class="actions-cell">
@@ -1517,14 +1517,15 @@
         `;
 
         // Update payment info
+        console.log(data , "dfwrfe")
                 document.getElementById('paymentInfo').innerHTML = `
                     <div class="payment-details">
                         {% comment %} <p><i class="fas fa-wallet"></i> <strong>Payment Method:</strong>  {% endcomment %}
                             {% comment %} <span class="payment-badge ${data.payment_method.toLowerCase()}">${data}</span> {% endcomment %}
                         {% comment %} </p> {% endcomment %}
                         <p><i class="fas fa-clock"></i> <strong>Order Date:</strong> ${data.created_at}</p>
-                        <p><i class="fas fa-info-circle"></i> <strong>Order Status:</strong> 
-                            <span class="status-badge ${data.status.toLowerCase()}">${data.payment_method}</span>
+                        <p><i class="fas fa-info-circle"></i> <strong>Payment Status:</strong> 
+                            <span class="status-badge ${data.status.toLowerCase()}">${data.payment_status}</span>
                        <p><i class="fas fa-info-circle"></i> <strong>Total Price:</strong> 
    <span class="total-amount">₹${data.total_amount}</span>
 </p>

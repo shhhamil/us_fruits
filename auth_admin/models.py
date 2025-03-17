@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 import os 
 from django.core.exceptions import ValidationError
 from user_profile.models import Address
-# ++++++++++++++++++++++++ Custom User Model +++++++++++++++++++++++++++
+# ==================================== Custom User Model===================================================================
 class CustomUser(AbstractUser):
     first_name = None
     last_name = None
@@ -30,18 +30,16 @@ class CustomUser(AbstractUser):
         return self.email
 
     def soft_delete(self):
-        """Soft delete the user by deactivating and storing deletion time."""
         self.deleted_at = timezone.now()
         self.is_active = False
         self.save()
 
     def restore(self):
-        """Restore the user by reactivating and clearing deletion time."""
         self.deleted_at = None
         self.is_active = True
         self.save()
 
-# ==================== Category Model ====================
+# ==================== Category Model ===================================================================================
 class Category(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -52,13 +50,11 @@ class Category(models.Model):
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def delete(self):
-        """Soft delete the category."""
         self.deleted_at = timezone.now()
         self.is_active = False
         self.save()
 
     def save(self, *args, **kwargs):
-        """Auto-update product offer prices when category discount changes."""
         super().save(*args, **kwargs)
         for product in self.products.all():
             product.save()   
@@ -69,8 +65,7 @@ class Category(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-
-# ==================== Product Model ====================
+# ==================== Product Model ==================================================================================
 class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='products')
@@ -87,12 +82,10 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        """Ensure offer percentage is valid."""
         if self.offer_percentage < 0 or self.offer_percentage > 100:
             raise ValidationError({"offer_percentage": "Offer percentage must be between 0 and 100."})
 
     def save(self, *args, **kwargs):
-        """Calculate offer price before saving."""
         self.clean()
         self.calculate_offer_price()
         super().save(*args, **kwargs)
@@ -100,26 +93,20 @@ class Product(models.Model):
         self.resize_images()
 
     def calculate_offer_price(self):
-        """Apply the highest discount (Product Offer vs Category Discount)."""
         category_discount = self.category.discount_percentage if self.category else 0
         product_discount = self.offer_percentage
-
-        # Apply the bigger discount
         highest_discount = max(category_discount, product_discount)  
-
         if highest_discount > 0:
             self.offer_price = round(self.price - (self.price * highest_discount / 100), 2)
         else:
             self.offer_price = self.price
 
     def resize_images(self):
-        """Resize product images to 500x500 pixels."""
         for image_field in [self.photo_1, self.photo_2, self.photo_3]:
             if image_field:
                 self._resize_image(image_field)
 
     def _resize_image(self, image_field):
-        """Resize and crop an image to 500x500 pixels."""
         try:
             image = Image.open(image_field)
             image = image.convert("RGB")
@@ -141,17 +128,14 @@ class Product(models.Model):
             print(f"Error resizing image {image_field.name}: {e}")
 
     def soft_delete(self):
-        """Soft delete: Disable product instead of removing it."""
         self.is_active = False
         self.save()
 
     def restore(self):
-        """Restore a soft-deleted product."""
         self.is_active = True
         self.save()
 
     def reduce_stock(self, quantity):
-        """Reduce stock when an order is placed."""
         if self.stock >= quantity:
             self.stock -= quantity
             self.save()
@@ -159,18 +143,16 @@ class Product(models.Model):
             raise ValueError("Not enough stock available.")
 
     def increase_stock(self, quantity):
-        """Increase stock when an order is canceled."""
         self.stock += quantity
         self.save()
 
     def get_photos(self):
-        """Return a list of available product images."""
         return [photo for photo in [self.photo_1, self.photo_2, self.photo_3] if photo]
 
     def __str__(self):
         return f"{self.name} ({self.category.name}) - ₹{self.offer_price}"
 
-# =================================Order Views================================================
+# =================================Order Views=====================================================================
 class Order(models.Model):
     STATUS_PENDING = 'pending'
     STATUS_SHIPPED = 'shipped'
@@ -211,15 +193,14 @@ class Order(models.Model):
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"Order #{self.id} - {self.user.email} ({self.status})"
+        return f"Order #{self.id} - {self.user.email} ({self.status})- ({self.payment_status}) - ({self.payment_method})"
 
     def calculate_total(self):
-        """Calculate total order price dynamically."""
         total = self.items.aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
         self.total = total + self.shipping_cost  
         self.save()
     
-# ======================================Order Items =====================================================
+# ======================================Order Items =============================================================
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")   
     product = models.ForeignKey(Product, on_delete=models.PROTECT)    
@@ -231,6 +212,5 @@ class OrderItem(models.Model):
 
     @property
     def get_total_offer_price(self):
-        """Calculate total price of this item."""
         return self.price * self.quantity  
 
