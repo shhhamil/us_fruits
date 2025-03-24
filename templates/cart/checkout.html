@@ -5,227 +5,416 @@
 
 {% block extra_css %}
     <style>
-        /* Custom Styles */
-        .payment-icons i {
-            font-size: 24px;
-            margin-right: 10px;
-            color: #6c757d;
-        }
-        .fa-cc-visa { color: #1a1f71; }
-        .fa-cc-mastercard { color: #eb001b; }
-        .fa-cc-amex { color: #2e77bc; }
-        .fa-paypal { color: #003087; }
-        
-        .card {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .address-cards .card:hover,
-        .payment-methods .card:hover {
-            border-color: #0d6efd;
-        }
-        
-        .form-check-input:checked {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-        .payment-form {
-            overflow: hidden;
-            transition: all 0.3s ease-out;
-            max-height: 0;
-        }
-
-        .payment-form.slide-down {
-            max-height: 400px; /* Adjust based on your content */
-        }
-
-        .payment-method-radio:checked + .form-check-label {
-            font-weight: bold;
-        }
-
-        .fa-money-bill-wave {
-            color: #28a745;
-            margin-left: 10px;
-        }
-
-        .cta-colored a {
-            color: #0d6efd;
-        }
-
-        /* Adjust margin for fixed navbar */
-        body {
-            padding-top: 0px;
-        }
-        .hero-section {
-            margin-top: 4rem;
-            position: relative;
-            height: 400px;
-            width: 100%;
-          }
-        
-          .hero-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-        
-          .hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding:0;
-          }
-        
-          .hero-title {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color:white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-          }
-        
-          .hero-subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-          }
-
-        .checkout-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            padding: 1rem;
-        }
-
-        .shipping-address {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .address-card {
-            border: 1px solid #ddd;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-
-        .order-summary {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .cart-item {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .cart-item img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .checkmark-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        <style>
+            /* Base Styles */
+            body {
+                padding-top: 0px;
+                background-color: #f8f9fa;
+                font-family: 'Poppins', sans-serif;
+            }
     
-        .checkmark-icon {
-            font-size: 60px;
-            animation: popScale 0.5s ease-in-out;
-        }
+            /* Hero Section Enhancements */
+            .hero-section {
+                margin-top: 0;
+                position: relative;
+                height: 400px;
+                width: 100%;
+                overflow: hidden;
+                border-radius: 0 0 20px 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            
+            .hero-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transform: scale(1.05);
+                transition: transform 0.7s ease;
+            }
+            
+            .hero-section:hover .hero-image {
+                transform: scale(1);
+            }
+            
+            .hero-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-align: center;
+                padding: 0;
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                letter-spacing: 2px;
+                font-weight: 700;
+                animation: fadeInDown 0.8s ease-out;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+                opacity: 0.9;
+                max-width: 600px;
+                animation: fadeInUp 0.8s ease-out;
+            }
     
-        @keyframes popScale {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+            @keyframes fadeInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
     
-        .truck-container {
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-            margin-top: 15px;
-        }
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
     
-        .truck {
-            font-size: 40px;
-            color: #3498db;
-            position: relative;
-            animation: moveTruck 2s ease-in-out infinite alternate;
-        }
+            /* Container Styles */
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
     
-        @keyframes moveTruck {
-            0% { transform: translateX(-50px); }
-            100% { transform: translateX(50px); }
-        }
+            /* Card Enhancements */
+            .card {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                margin-bottom: 25px;
+                overflow: hidden;
+            }
+            
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+            
+            .card-header {
+                background-color: #ffffff;
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+                padding: 20px;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+    
+            /* Address Cards */
+            .address-cards .card {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            
+            .address-cards .card:hover {
+                border-color: #0d6efd;
+                transform: translateY(-3px);
+            }
+            
+            .address-cards .card.border-primary {
+                border-left: 4px solid #0d6efd;
+            }
+    
+            /* Form Elements */
+            .form-check-input:checked {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+            }
+            
+            .form-check-label {
+                padding-left: 10px;
+                line-height: 1.5;
+            }
+    
+            /* Payment Methods */
+            .payment-methods .card {
+                margin-bottom: 15px;
+                border-radius: 10px;
+            }
+            
+            .payment-methods .card:hover {
+                border-color: #0d6efd;
+            }
+            
+            .payment-method-radio:checked + .form-check-label {
+                font-weight: 600;
+                color: #0d6efd;
+            }
+    
+            /* Payment Icons */
+            .payment-icons i {
+                font-size: 28px;
+                margin-right: 15px;
+                transition: transform 0.3s ease;
+            }
+            
+            .payment-icons i:hover {
+                transform: scale(1.2);
+            }
+            
+            .fa-cc-visa { color: #1a1f71; }
+            .fa-cc-mastercard { color: #eb001b; }
+            .fa-cc-amex { color: #2e77bc; }
+            .fa-paypal { color: #003087; }
+            .fa-money-bill-wave { 
+                color: #28a745; 
+                margin-left: 10px;
+            }
+    
+            /* Payment Form */
+            .payment-form {
+                overflow: hidden;
+                transition: max-height 0.5s ease-out, opacity 0.3s ease;
+                max-height: 0;
+                opacity: 0;
+            }
+            
+            .payment-form.slide-down {
+                max-height: 400px;
+                opacity: 1;
+            }
+    
+            /* Order Summary */
+            .order-summary {
+                background: white;
+                padding: 2rem;
+                border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            }
+            
+            /* Cart Items */
+            .cart-item {
+                display: flex;
+                gap: 1rem;
+                margin: 1rem 0;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #f0f0f0;
+                transition: transform 0.3s ease;
+            }
+            
+            .cart-item:hover {
+                transform: translateX(5px);
+            }
+            
+            .cart-item img {
+                width: 70px;
+                height: 70px;
+                object-fit: cover;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+    
+            /* Buttons */
+            .btn {
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-primary {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+                box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+            }
+            
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0b5ed7;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 8px rgba(13, 110, 253, 0.3);
+            }
+            
+            .btn-outline-primary {
+                border-color: #0d6efd;
+                color: #0d6efd;
+            }
+            
+            .btn-outline-primary:hover {
+                background-color: #0d6efd;
+                color: white;
+            }
+    
+            /* Modal Styles */
+            .modal-content {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            
+            .modal-header {
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                border-top: 1px solid rgba(0,0,0,0.05);
+                padding: 20px;
+            }
+    
+            /* Success Modal */
+            .checkmark-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 120px;
+            }
+            
+            .checkmark-icon {
+                font-size: 80px;
+                animation: popScale 0.7s ease-in-out;
+            }
+            
+            @keyframes popScale {
+                0% { transform: scale(0); opacity: 0; }
+                70% { transform: scale(1.1); opacity: 1; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            
+            /* Truck Animation */
+            .truck-container {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+                margin-top: 25px;
+                height: 60px;
+            }
+            
+            .truck {
+                font-size: 40px;
+                color: #3498db;
+                position: relative;
+                animation: moveTruck 3s ease-in-out infinite alternate;
+            }
+            
+            @keyframes moveTruck {
+                0% { transform: translateX(-100px); }
+                100% { transform: translateX(100px); }
+            }
+    
+            /* Coupon Section */
+            .coupon-section {
+                background-color: #ffffff;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 25px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            }
+            
+            .coupon-section h3 {
+                margin-bottom: 15px;
+                color: #0d6efd;
+                font-weight: 600;
+            }
+            
+            .coupon-item {
+                padding: 10px;
+                border: 1px dashed #ddd;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            
+            .coupon-item:hover {
+                border-color: #0d6efd;
+                background-color: #f8f9ff;
+            }
+            
+            .coupon-item input[type="radio"] {
+                margin-right: 10px;
+            }
+            
+            #apply-coupon-btn {
+                margin-top: 10px;
+            }
+    
+            /* Media Queries */
+            @media (max-width: 768px) {
+                .hero-title {
+                    font-size: 2rem;
+                }
+                
+                .hero-subtitle {
+                    font-size: 1rem;
+                }
+                
+                .card {
+                    margin-bottom: 15px;
+                }
+            }
     </style>
     {% endblock %}
 
 
     {% block content %}
-    <!-- Hero Section -->
-<section class="hero-section">
-    <img src="{% static 'userr/images/main.image6.jpg' %}" alt="Fresh Fruits" class="hero-image">
-    <div class="hero-overlay">
-        <h2 class="hero-title"><b>Checkout</b></h2>
-        <p class="hero-subtitle">Fresh & Organic Fruits Delivered to Your Door</p>
-    </div>
-</section>
- 
-        
-<div class="container mt-5">
+    <section class="hero-section">
+        <img src="{% static 'userr/images/main.image6.jpg' %}" alt="Fresh Fruits" class="hero-image">
+        <div class="hero-overlay">
+            <h2 class="hero-title"><b>Checkout</b></h2>
+            <p class="hero-subtitle">Fresh & Organic Fruits Delivered to Your Door</p>
+        </div>
+    </section>
+     
+    <div class="container mt-5">
         <div class="row">
             <!-- Left Column - Address and Payment -->
             <div class="col-md-8">
                 <!-- Shipping Address Section -->
                 <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Shipping Address</h5>
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                        + Add New Address
-                    </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                            <i class="fas fa-plus-circle"></i> Add New Address
+                        </button>
                     </div>
+                    <div class="card-body">
                         <div class="address-cards">
-                    {% if addresses %}
-                            {% for address in addresses %}
-                            <div class="card mb-2 {% if address.is_default %}border-primary{% endif %}">
-                                <div class="card-body">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="shipping_address"
-                                               id="address_{{ address.id }}" value="{{ address.id }}" 
-                                               {% if address.is_default %}checked{% endif %}>
-                                        <label class="form-check-label" for="address_{{ address.id }}">
-                                            {% if address.is_default %}<span class="badge bg-primary ms-2">Default</span>{% endif %}
-                                            <br>{{ address.street }}<br>
-                                            {{ address.city }}, {{ address.state }} {{ address.pin_code }}<br>
-                                            {{ address.country }}<br>
-                                            Phone: {{ address.phone }}
-                                        </label>
+                            {% if addresses %}
+                                {% for address in addresses %}
+                                    <div class="card mb-3 {% if address.is_default %}border-primary{% endif %}">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="shipping_address"
+                                                    id="address_{{ address.id }}" value="{{ address.id }}" 
+                                                    {% if address.is_default %}checked{% endif %}>
+                                                <label class="form-check-label" for="address_{{ address.id }}">
+                                                    {% if address.is_default %}<span class="badge bg-primary ms-2">Default</span>{% endif %}
+                                                    <br>{{ address.street }}<br>
+                                                    {{ address.city }}, {{ address.state }} {{ address.pin_code }}<br>
+                                                    {{ address.country }}<br>
+                                                    <i class="fas fa-phone-alt"></i> {{ address.phone }}
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No addresses found. Please add a delivery address.
                                 </div>
-                            </div>
-                            {% endfor %}
-                    {% else %}
-                        <div class="alert alert-info">No addresses found. Please add a delivery address.</div>
-                    {% endif %}
-                </div>
-                
-                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Payment Method Section -->
@@ -235,16 +424,15 @@
                     </div>
                     <div class="card-body">
                         <div class="payment-methods">
-                
-                            <!-- ✅ Cash on Delivery (COD) Option -->
-                            <div class="card mb-2">
+                            <!-- Cash on Delivery (COD) Option -->
+                            <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="form-check">
                                         <input class="form-check-input payment-method-radio" type="radio" name="payment_method" 
-                                               id="cod" value="cod" checked>
+                                            id="cod" value="cod" checked>
                                         <label class="form-check-label" for="cod">
+                                            <i class="fas fa-money-bill-wave text-success me-2"></i>
                                             Cash on Delivery
-                                            <i class="fas fa-money-bill-wave text-success ms-2"></i>
                                         </label>
                                     </div>
                                     <div class="payment-form mt-3" id="cod_form">
@@ -255,49 +443,88 @@
                                     </div>
                                 </div>
                             </div>
-                
-                            <!-- ✅ Razorpay Payment Option -->
-                            <div class="card mb-2">
+                            
+                            <!-- Razorpay Payment Option -->
+                            <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="form-check">
                                         <input class="form-check-input payment-method-radio" type="radio" name="payment_method" 
-                                               id="razorpay" value="razorpay">
+                                            id="razorpay" value="razorpay">
                                         <label class="form-check-label" for="razorpay">
-                                            Razorpay (Credit/Debit/UPI)
-                                            <p>Razorpay Key: {{ R_ID }}</p>
-
-                                            <i class="fas fa-credit-card text-primary ms-2"></i>
+                                            <i class="fas fa-credit-card text-primary me-2"></i>
+                                            Razorpay 
                                         </label>
                                     </div>
                                     <div class="payment-form mt-3 d-none" id="razorpay_form">
                                         <p>Secure payment via Razorpay.</p>
-                                        <button id="pay-btn" class="btn btn-primary">Pay with Razorpay</button>
+                                        <p class="text-muted">Razorpay Key: {{RAZORPAY_KEY_ID }}</p>
+                                        <button id="pay-btn" class="btn btn-primary">
+                                            <i class="fas fa-lock me-2"></i> Pay with Razorpay
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                
-                            <!-- ✅ Wallet Payment Option -->
-                            <div class="card mb-2">
+                            
+                            <!-- Wallet Payment Option -->
+                            <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="form-check">
                                         <input class="form-check-input payment-method-radio" type="radio" name="payment_method" 
-                                               id="wallet" value="wallet">
+                                            id="wallet" value="wallet">
                                         <label class="form-check-label" for="wallet">
-                                            Pay with Wallet 
-                                            <i class="fas fa-wallet text-warning ms-2"></i>
+                                            <i class="fas fa-wallet text-warning me-2"></i>
+                                            Pay with Wallet
                                         </label>
                                     </div>
                                     <div class="payment-form mt-3 d-none" id="wallet_form">
                                         <p>Use your wallet balance for this order.</p>
-                                        <p><strong>Wallet Balance: ₹<span id="wallet-balance">{{ wallet_balance|default:0 }}</span></strong></p>
-                                        <button type="submit" class="btn btn-success" id="wallet-pay-btn">Pay with Wallet</button>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span class="me-2">Wallet Balance:</span>
+                                            <span class="badge bg-success p-2">₹<span id="wallet-balance">{{ wallet_balance|default:0 }}</span></span>
+                                        </div>
+                                        <button type="submit" class="btn btn-success" id="wallet-pay-btn">
+                                            <i class="fas fa-wallet me-2"></i> Pay with Wallet
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                
                         </div>
                     </div>
                 </div>
+                
+                <!-- Coupon Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Apply Coupon</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if coupons %}
+                            {% for coupon in coupons %}
+                                <div class="coupon-item">
+                                    <input type="radio" name="coupon" id="coupon-{{ coupon.id }}" 
+                                        value="{{ coupon.id }}" 
+                                        data-discount="{{ coupon.discount_amount }}" 
+                                        data-min="{{ coupon.min_order_amount }}">
+                                    <label for="coupon-{{ coupon.id }}">
+                                        <span class="badge bg-primary">{{ coupon.code }}</span>
+                                        <span class="ms-2">{{ coupon.discount_amount }} off</span>
+                                        <small class="text-muted ms-2">(Min Order: ₹{{ coupon.min_order_amount }})</small>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            <button id="apply-coupon-btn" class="btn btn-outline-primary mt-3">
+                                <i class="fas fa-tag me-2"></i> Apply Coupon
+                            </button>
+                            <p id="coupon-message" class="text-danger mt-2"></p>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> No coupons available at the moment.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
             <!-- Right Column - Order Summary -->
             <div class="col-md-4">
                 <div class="card">
@@ -305,51 +532,55 @@
                         <h5 class="mb-0">Order Summary</h5>
                     </div>
                     <div class="card-body">
-                    {% if cart_items %}
-                        {% for item in cart_items %}
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ item.product.photo_1.url }}" alt="{{ item.product.name }}" 
-                                     style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
-                                <div>
-                                    <p class="mb-0">{{ item.product.name }}</p>
-                                    <small class="text-muted">
-                                        ₹{{ item.product.offer_price|floatformat:2 }} × {{ item.quantity }}
-                                    </small>
+                        {% if cart_items %}
+                            {% for item in cart_items %}
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ item.product.photo_1.url }}" alt="{{ item.product.name }}" 
+                                            style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px; border-radius: 8px;">
+                                        <div>
+                                            <p class="mb-0 fw-semibold">{{ item.product.name }}</p>
+                                            <small class="text-muted">
+                                                ₹{{ item.product.offer_price|floatformat:2 }} × {{ item.quantity }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="fw-bold">₹{{ item.total_price|floatformat:2 }}</span>
                                 </div>
-                            </div>
-                            <span class="text-end">₹{{ item.total_price|floatformat:2 }}</span>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
                             <hr>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Subtotal</span>
-                            <span>₹{{ cart_total|floatformat:2 }}</span>
+                                <span>₹{{ cart_total|floatformat:2 }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Shipping</span>
-                            <span>₹{{ shipping_cost|floatformat:2 }}</span>
+                                <span>₹{{ shipping_cost|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2" id="discount-row" style="display: none !important;">
+                                <span>Discount</span>
+                                <span id="discount-amount">-₹0.00</span>
                             </div>
                             <hr>
-                        <div class="d-flex justify-content-between mb-3">
+                            <div class="d-flex justify-content-between mb-3">
                                 <strong>Total</strong>
-                            <strong>₹{{ total_amount|floatformat:2 }}</strong>
+                                <strong id="total-price">₹{{ total_amount|floatformat:2 }}</strong>
+                                
                             </div>
-                        <button class="btn btn-primary w-100" id="placeOrderBtn" type="button">
-                            Place Order
-                        </button>
-                    {% else %}
-                        <div class="alert alert-warning mb-0">
-                            <i class="fas fa-shopping-cart"></i> Your cart is empty
-                        </div>
-                    {% endif %}
+                            <button class="btn btn-primary w-100" id="placeOrderBtn" type="button">
+                                <i class="fas fa-shopping-cart me-2"></i> Place Order
+                            </button>
+                        {% else %}
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-shopping-cart"></i> Your cart is empty
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-
+    
     <!-- Add Address Modal -->
     <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -359,43 +590,43 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                <form id="addressForm" method="POST">
-                    {% csrf_token %}
+                    <form id="addressForm" method="POST">
+                        {% csrf_token %}
                         <div class="mb-3">
-                        <label for="street" class="form-label">Street Address</label>
-                        <input type="text" class="form-control" id="street" name="street" required>
+                            <label for="street" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" id="street" name="street" required>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="city" class="form-label">City</label>
-                            <input type="text" class="form-control" id="city" name="city" required>
+                                <input type="text" class="form-control" id="city" name="city" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="state" class="form-label">State</label>
-                            <input type="text" class="form-control" id="state" name="state" required>
-                        </div>
+                                <input type="text" class="form-control" id="state" name="state" required>
+                            </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                            <label for="pin_code" class="form-label">PIN Code</label>
-                            <input type="text" class="form-control" id="pin_code" name="pin_code" required>
+                                <label for="pin_code" class="form-label">PIN Code</label>
+                                <input type="text" class="form-control" id="pin_code" name="pin_code" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="country" class="form-label">Country</label>
-                            <select class="form-select" id="country" name="country" required>
+                                <select class="form-select" id="country" name="country" required>
                                     <option value="">Select Country</option>
-                                <option value="India" selected>India</option>
+                                    <option value="India" selected>India</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" required 
-                               pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number">
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_default" name="is_default">
-                        <label class="form-check-label" for="is_default">Set as default address</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required 
+                                pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_default" name="is_default">
+                            <label class="form-check-label" for="is_default">Set as default address</label>
                         </div>
                     </form>
                 </div>
@@ -406,26 +637,27 @@
             </div>
         </div>
     </div>
- 
- 
-<!-- Order Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="orderSuccessModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <!-- Animated Check Icon -->
-                <div class="checkmark-container">
-                    <i class="fas fa-check-circle text-success checkmark-icon"></i>
+    
+    <!-- Order Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="orderSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <!-- Animated Check Icon -->
+                    <div class="checkmark-container">
+                        <i class="fas fa-check-circle text-success checkmark-icon"></i>
+                    </div>
+                    <h4 class="mt-3 text-success">Order Placed Successfully!</h4>
+                    <p class="text-muted">Thank you for your order. Your fruits are on the way!</p>
+                    <div class="truck-container">
+                        <div class="text-center">
+                            <i class="fas fa-truck truck"></i>
+                        </div>
+                    </div>
                 </div>
-
-                <h4 class="mt-3 text-success">Order Placed Successfully!</h4>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="redirectToOrders" data-bs-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
-</div>
 
     {% endblock %}
 
@@ -433,6 +665,7 @@
     {% block extra_js %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
  
         <script>   
             document.addEventListener("DOMContentLoaded", function () {
@@ -525,76 +758,61 @@
                         }
                     });
                 }
-            
-                // ✅ Razorpay Payment Processing
                 async function processRazorpayPayment(addressId) {
-                    let amount = "{{ total_amount }}";  // Get total amount
-                    let csrfToken = "{{ csrf_token }}";  // Get CSRF token
-            
+                    const csrfToken = "{{ csrf_token }}";  
+                
                     try {
-                        // ✅ 1. Request Razorpay Order from Backend
+
                         const response = await fetch("/create-order/", {
                             method: "POST",
                             headers: {
-                                "Content-Type": "application/x-www-form-urlencoded",
+                                "Content-Type": "application/json",
                                 "X-CSRFToken": csrfToken,
                             },
-                            body: `amount=${amount}`,
+                            body: JSON.stringify({ cartTotal: "{{ total_amount }}" }),
                         });
-            
-                        if (!response.ok) {
-                            throw new Error("Failed to create Razorpay order");
-                        }
-            
+                
                         const data = await response.json();
-            
-                        if (data.error) {
-                            showNotification(data.error, "error");
+                        console.log("✅ Razorpay Response:", data);
+                        console.log(typeof Razorpay);
+
+                
+                        if (!data.razorpayOrderId) {
+                            console.error("❌ Order ID is missing:", data);
+                            showNotification("Error: Razorpay Order ID missing!", "error");
                             return;
                         }
-            
-                        console.log("✅ Razorpay Response:", data);
-            
-                        // ✅ 2. Configure Razorpay Checkout
+                
                         var options = {
-                            key: data.R_ID,  // Razorpay Key
-                            amount: data.amount,  // Amount in paise
-                            currency: data.currency,  // INR
-                            order_id: data.order_id,  // Order ID
+                            key: data.razorpayKeyId,
+                            amount: data.amount,
+                            currency: "INR",
+                            order_id: data.razorpayOrderId,
                             name: "US Fruits",
                             description: "Secure Payment",
                             handler: async function (response) {
                                 console.log("✅ Payment Success:", response);
-            
-                                // ✅ 3. Confirm Payment with Backend
-                                try {
-                                    const res = await fetch("/place_order/", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": csrfToken,
-                                        },
-                                        body: JSON.stringify({
-                                            address_id: addressId,
-                                            payment_method: "razorpay",
-                                            razorpay_payment_id: response.razorpay_payment_id,
-                                        }),
-                                    });
-            
-                                    const result = await res.json();
-                                    console.log("✅ Order Confirmation Response:", result);
-            
-                                    if (result.success) {
-                                        showSuccessModal();
-                                        setTimeout(() => {
-                                            window.location.href = result.redirect_url;
-                                        }, 2000);
-                                    } else {
-                                        showNotification(result.message, "error");
-                                    }
-                                } catch (error) {
-                                    console.error(" Order Confirmation Error:", error);
-                                    showNotification("Failed to confirm the order after payment.", "error");
+                
+                                const res = await fetch("/place_order/", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": csrfToken,
+                                    },
+                                    body: JSON.stringify({
+                                        address_id: addressId,
+                                        payment_method: "razorpay",
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                    }),
+                                });
+                
+                                const result = await res.json();
+                                console.log("✅ Order Confirmation Response:", result);
+                
+                                if (result.success) {
+                                    window.location.href = result.redirect_url;
+                                } else {
+                                    showNotification(result.message, "error");
                                 }
                             },
                             prefill: {
@@ -603,16 +821,27 @@
                                 contact: "{{ user.profile.phone }}",
                             },
                             theme: { color: "#3399cc" },
+                            modal: {
+                                ondismiss: function () {
+                                    console.log("❌ Razorpay checkout was closed by the user.");
+                                    showNotification("Payment cancelled. Please try again.", "error");
+                                }
+                            }
                         };
-            
-                        // ✅ 4. Open Razorpay Checkout
-                        var rzp = new Razorpay(options);
-                        rzp.open();
+                
+                        console.log("🔄 Initializing Razorpay Checkout...");
+                        setTimeout(() => {
+                            var rzp = new Razorpay(options);
+                            rzp.open();
+                        }, 500);  // Slight delay to prevent blocking
+                
                     } catch (error) {
                         console.error("❌ Razorpay Error:", error);
                         showNotification("Failed to process Razorpay payment. Please try again.", "error");
                     }
                 }
+                
+
             
                 // ✅ Handle COD Order
                 async function processCODOrder(addressId) {
@@ -684,8 +913,54 @@
                     modal.show();
                 }
             });
+            //---------------//
+            document.getElementById("apply-coupon-btn").addEventListener("click", function () {
+                let selectedCoupon = document.querySelector("input[name='coupon']:checked");
             
-        </script>                  
+            
+                if (!selectedCoupon) {
+                    document.getElementById("coupon-message").innerText = "Please select a coupon.";
+                    return;
+                }
+            
+                let couponId = selectedCoupon.value;
+                let csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
+            
+                fetch("/apply_coupon/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: JSON.stringify({ coupon_id: couponId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Server Response:", data);  // Debugging
+            
+                    if (data.success) {
+                        document.getElementById("coupon-message").innerText = "Coupon applied successfully!";
+                        document.getElementById("discount-row").style.display = "flex";  
+            
+                        let discountAmount = Number(data.discount_amount) || 0;
+                        let totalAmount = Number(data.total_amount) || 0;
+            
+                        document.getElementById("discount-amount").textContent = `-₹${discountAmount.toFixed(2)}`;
+                        document.getElementById("total-price").textContent = `₹${totalAmount.toFixed(2)}`;
+                    } else {
+                        document.getElementById("coupon-message").innerText = data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("coupon-message").innerText = "Something went wrong. Please try again.";
+                });
+            });
+            
+                   
+            
+                </script>
+                     
  
         
     {% endblock %}

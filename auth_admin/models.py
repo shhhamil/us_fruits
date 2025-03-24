@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from PIL import Image
+from django.utils.timezone import now
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractUser
@@ -184,26 +185,34 @@ class Order(models.Model):
     date_of_order = models.DateTimeField(auto_now_add=True)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True) 
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=30.00)   
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True, blank=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default=PAYMENT_UNPAID)
     cancellation_reason = models.CharField(max_length=255, blank=True, null=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)   
 
     def __str__(self):
-        return f"Order #{self.id} - {self.user.email} ({self.status})- ({self.payment_status}) - ({self.payment_method})"
+        return f"Order {self.id} - {self.user.email} ({self.status}) - ({self.payment_status}) - ({self.payment_method})"
 
     def calculate_total(self):
-        total = self.items.aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
-        self.total = total + self.shipping_cost  
+        total = sum(item.get_total_offer_price for item in self.items.all())
+
+        discount = 0
+        if self.coupon and self.coupon.is_active and self.coupon.valid_from <= now() <= self.coupon.valid_to:
+            discount = (total * self.coupon.discount) / 100 if self.coupon.discount else 0
+
+        self.discount_amount = discount
+        self.total = total + self.shipping_cost - discount
         self.save()
-    
+
 # ======================================Order Items =============================================================
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")   
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)    
+    product = models.ForeignKey('Product', on_delete=models.PROTECT)    
     quantity = models.PositiveIntegerField(default=1)     
     price = models.DecimalField(max_digits=10, decimal_places=2)  
 
@@ -212,5 +221,29 @@ class OrderItem(models.Model):
 
     @property
     def get_total_offer_price(self):
-        return self.price * self.quantity  
+        product_offer_price = self.product.price   
 
+        if self.product.offer_price:
+            product_offer_price = self.product.offer_price
+
+        if self.product.category and self.product.category.offer_price:
+            category_offer_price = self.product.category.offer_price
+            product_offer_price = min(product_offer_price, category_offer_price)
+
+        return product_offer_price * self.quantity
+# -------------------------------------------------------------------------------------------
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)  
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2)  
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  
+    usage_limit = models.PositiveIntegerField(default=1)   
+    start_date = models.DateTimeField(default=now)  
+    end_date = models.DateTimeField() 
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.code} - {self.discount_amount}%"
+
+    def toggle_delete(self):
+        self.is_deleted = not self.is_deleted
+        self.save()

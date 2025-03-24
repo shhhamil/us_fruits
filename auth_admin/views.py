@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Count
+from django.utils.dateparse import parse_datetime
 from django.contrib import messages
 from decimal import Decimal
+from .models import Coupon
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.dateparse import parse_date
@@ -56,7 +60,17 @@ def admin_dashbord(request):
     if not request.user.is_superuser:
         messages.error(request, 'You are not authorized to access this page.')
         return redirect('Admin_Login')
-    return render(request, 'auth_admin/admin_dashbord.html')
+    
+    popular_products = Product.objects.annotate(order_count=Count('orderitem')).order_by('-order_count')[:5]
+    popular_categories = Category.objects.annotate(order_count=Count('products__orderitem')).order_by('-order_count')[:5]
+    
+
+    
+    context = {
+        'popular_products': popular_products,
+        'popular_categories': popular_categories,
+    }
+    return render(request, 'auth_admin/admin_dashbord.html', context)
 # ______________________________________________________________________________________________________________
 # ---------------------------------------LOGOUT VIEWS-----------------------------------------------------------
 @never_cache
@@ -419,7 +433,7 @@ def block_user(request, user_id):
 def order_management(request):
     status_filter = request.GET.get('status', 'all').strip().lower()
 
-    # --------------------- Filter orders based on status -----------------------------
+
     orders = Order.objects.all().order_by('-date_of_order')
 
     if status_filter in dict(Order.STATUS_CHOICES): 
@@ -484,34 +498,43 @@ def update_order_status(request, orderId):
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 #  -----------------------------this for getting all user detials------------------------------------------------------
 def get_order_details(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    total_amount = sum(item.product.offer_price * item.quantity for item in order.items.all()) + 30
+    if request.user.is_superuser:
+        order = get_object_or_404(Order, id=order_id)  #this for Admin can access all
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)  # this for Normal user can only access their own
 
     order_data = {
         "id": order.id,
         "created_at": order.date_of_order.strftime("%b %d, %Y"),
         "status": order.status,
-        "payment_status":order.payment_status,
+        "payment_status": order.payment_status,
         "payment_method": order.payment_method,
-        "total_amount": total_amount,  
-        "address": {
-            "street": order.address.street if order.address else "N/A",
-            "city": order.address.city if order.address else "N/A",
-            "state": order.address.state if order.address else "N/A",
-            "pin_code": order.address.pin_code if order.address else "N/A",
-            "phone": order.address.phone if order.address else "N/A",
-        },
+        "total_amount": float(order.total),
+        "discount_amount": float(order.discount_amount or 0),
+        "address": {},
         "items": [
             {
                 "product_name": item.product.name,
                 "quantity": item.quantity,
-                "price": item.product.price * item.quantity, 
+                "price": float(item.price),
                 "product_image": item.product.photo_1.url if item.product.photo_1 else "",
             }
             for item in order.items.all()
         ]
     }
+
+    if order.address:
+        order_data["address"] = {
+            "street": order.address.street,
+            "city": order.address.city,
+            "state": order.address.state,
+            "pin_code": order.address.pin_code,
+            "phone": order.address.phone,
+        }
+
     return JsonResponse(order_data)
+
+
 # --------------------------------------sales report---------------------------------------------------------------
 @login_required
 def sales_report(request):
@@ -665,3 +688,101 @@ def filter_custom_date(request):
         orders = Order.objects.none()
     return render(request, 'auth_admin/sales.html', {'orders': orders})
 
+# --------------------------------COUPON MANAGMENT -------------------------------------------------------------
+def coupon_list(request):
+    coupons = Coupon.objects.all()
+    return render(request, "auth_admin/coupon.html", {"coupons": coupons})
+# ---------------------------------------------------------------------------------------------------------
+def add_coupon(request):
+    if request.method == "POST":
+        code = request.POST.get("code", "").strip()
+        discount_amount = request.POST.get("discount_amount", "0")   
+        min_order_amount = request.POST.get("minimum_order_amount", "0")   
+        usage_limit = request.POST.get("usage_limit", "1")
+        valid_from = request.POST.get("start_date", "")  
+        valid_to = request.POST.get("end_date", "")  
+
+        if not code or not valid_from or not valid_to:
+            return JsonResponse({"success": False, "error": "Missing required fields"}, status=400)
+
+        try:
+            discount_amount = float(discount_amount)
+            min_order_amount = float(min_order_amount)
+            usage_limit = int(usage_limit)
+            valid_from = parse_datetime(valid_from)
+            valid_to = parse_datetime(valid_to)
+
+            if valid_from is None or valid_to is None:
+                return JsonResponse({"success": False, "error": "Invalid date format"}, status=400)
+
+            coupon = Coupon.objects.create(
+                code=code,
+                discount_amount=discount_amount,
+                min_order_amount=min_order_amount,
+                usage_limit=usage_limit,
+                start_date=valid_from,
+                end_date=valid_to,
+            )
+
+            return JsonResponse({"success": True})
+
+        except ValueError as e:
+            return JsonResponse({"success": False, "error": "Invalid data type"}, status=400)
+
+    return JsonResponse({"success": False}, status=400)
+# ---------------------------------------------------------------------------------
+def edit_coupon(request, coupon_id):
+    if request.method == "POST":
+        coupon = get_object_or_404(Coupon, id=coupon_id)
+        code = request.POST.get("code")
+        discount_amount = request.POST.get("discount_amount")
+        min_order_amount = request.POST.get("min_order_amount")
+        usage_limit = request.POST.get("usage_limit")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        try:
+            if not min_order_amount:
+                return JsonResponse({"success": False, "error": "Minimum order amount is required."})
+
+            discount_amount = float(discount_amount)  
+            min_order_amount = Decimal(min_order_amount)   
+
+            if discount_amount > min_order_amount:
+                return JsonResponse({"success": False, "error": "Discount amount cannot be greater than minimum order amount."})
+
+        except ValueError:
+            return JsonResponse({"success": False, "error": "Discount amount and minimum order amount must be valid numbers."})
+
+        if usage_limit:
+            try:
+                usage_limit = int(usage_limit)
+            except ValueError:
+                return JsonResponse({"success": False, "error": "Usage limit must be a valid integer."})
+
+
+        start_date = parse_datetime(start_date)
+        end_date = parse_datetime(end_date)
+
+        if not start_date or not end_date:
+            return JsonResponse({"success": False, "error": "Invalid date format."})
+
+        if start_date >= end_date:
+            return JsonResponse({"success": False, "error": "Start date must be earlier than end date."})
+
+        coupon.code = code
+        coupon.discount_amount = discount_amount
+        coupon.min_order_amount = min_order_amount
+        coupon.usage_limit = usage_limit
+        coupon.start_date = start_date
+        coupon.end_date = end_date
+        coupon.save()
+
+        return JsonResponse({"success": True, "message": "Coupon updated successfully!"})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+# --------------------------------------------------------------------------------
+def delete_coupon(request, coupon_id):
+    coupon = Coupon.objects.get(id=coupon_id)
+    coupon.toggle_delete()
+    return redirect("coupon_list")

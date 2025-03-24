@@ -21,28 +21,42 @@ class Wallet(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def deposit(self, amount):
-        """Add money to the wallet"""
         self.balance += amount
         self.save()
 
+        transaction = WalletTransaction.objects.create(
+            wallet=self,
+            transaction_type="credit",
+            amount=amount
+        )
+        
+
+
     def withdraw(self, amount):
-        """Deduct money from the wallet"""
         if self.balance >= amount:
             self.balance -= amount
             self.save()
+            
+            WalletTransaction.objects.create(
+                wallet=self,
+                transaction_type="debit",
+                amount=amount
+            )
             return True
-        return False 
+        return False
+
 # ------------------------------------------------------
 class WalletTransaction(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     TRANSACTION_TYPES = [
-        ("credit", "Credit"),
-        ("debit", "Debit"),
+        ("credit", "credit"),
+        ("debit", "debit"),
     ]
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.wallet.user.username} - {self.transaction_type} ₹{self.amount}"
 
+ 

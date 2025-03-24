@@ -220,6 +220,10 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        display: block !important;
+        visibility: visible !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 
     .transaction-item {
@@ -229,6 +233,7 @@
         padding: 1rem 0;
         border-bottom: 1px solid #f1f1f1;
     }
+    
 
     .transaction-info {
         display: flex;
@@ -516,7 +521,6 @@
             <div class="transactions-card">
                 <div class="card-header">
                     <h3 class="card-title">Recent Transactions</h3>
-                    <a href="{% url 'wallet' %}" class="view-all">View All</a>
                 </div>
     
                 <div class="transaction-list">
@@ -524,19 +528,19 @@
                         {% for transaction in transactions %}
                             <div class="transaction-item">
                                 <div class="transaction-info">
-                                    <div class="transaction-icon">
+                                    <div class="transaction-icon" style="{% if transaction.transaction_type == 'credit' %}background-color: rgba(130, 174, 70, 0.1);{% else %}background-color: rgba(229, 62, 62, 0.1);{% endif %}">
                                         {% if transaction.transaction_type == "credit" %}
-                                            <i class="fas fa-plus-circle text-success"></i>
+                                            <i class="fas fa-plus-circle" style="color: #82ae46;"></i>
                                         {% else %}
-                                            <i class="fas fa-shopping-cart text-danger"></i>
+                                            <i class="fas fa-shopping-cart" style="color: #e53e3e;"></i>
                                         {% endif %}
                                     </div>
                                     <div class="transaction-details">
                                         <span class="transaction-title">
                                             {% if transaction.transaction_type == "credit" %}
-                                                Added to Wallet
+                                                <span class="badge badge-success" style="background-color: #82ae46; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; margin-right: 5px;">CREDIT</span> Money Added
                                             {% else %}
-                                                Order {{ transaction.id }}
+                                                <span class="badge badge-danger" style="background-color: #e53e3e; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; margin-right: 5px;">DEBIT</span> Payment for Order
                                             {% endif %}
                                         </span>
                                         <span class="transaction-date">{{ transaction.created_at|date:"M d, Y" }}</span>
@@ -588,7 +592,8 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>  
+</div>
 {% endblock %}
 
 {% block extra_js %}

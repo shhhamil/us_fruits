@@ -1,14 +1,16 @@
-from django.shortcuts import render, redirect 
+from django.shortcuts import render, redirect , get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from reportlab.lib import colors
+from decimal import Decimal
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph , Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from django.db import transaction
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
+from django.contrib import messages
 from .models import Address
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
@@ -158,116 +160,119 @@ def set_default_address(request, address_id):
 # --------------------------------------------------------------------------------------------------------------
 @login_required
 def order_history(request):
-    if request.user.is_authenticated:
-        orders = Order.objects.filter(user=request.user).order_by('-id').select_related('user')
+    orders = Order.objects.filter(user=request.user).order_by('-id').select_related('user')
 
-        subtotal = 0
-        orders_data = []
-        
-        for order in orders:
-            total_price = sum(item.product.price * item.quantity for item in order.items.all())
-            subtotal += total_price   
+    subtotal = 0  
+    orders_data = []
 
-            orders_data.append({
-                'id': order.id,
-                'date_of_order': order.date_of_order.strftime("%b %d, %Y"),
-                'status': order.status,
-                'payment_status': order.payment_status,  
-                'payment_method': order.payment_method,
-                'total_price': total_price,
-                'items': order.items.all(),
-            })
+    shipping_cost = 30  # Modify if it's dynamic per order
 
-        shipping_cost = 30   
-        total_amount = subtotal + shipping_cost
+    for order in orders:
+        order_total = order.total - (order.discount_amount or 0)  # Ensure discount is subtracted
+        subtotal += order_total  
 
-
-        return render(request, 'user_profile/order_history.html', {
-            'orders': orders_data, 
-            'subtotal': subtotal,
-            'total_amount': total_amount
+        orders_data.append({
+            'id': order.id,
+            'date_of_order': order.date_of_order.strftime("%b %d, %Y"),
+            'status': order.status,
+            'payment_status': order.payment_status,
+            'payment_method': order.payment_method,
+            'total_price': order_total,  
+            'items': order.items.all(),
+            'discount': order.discount_amount or 0,  
+            'shipping_cost': shipping_cost,
+            'final_total': order_total + shipping_cost,  # If needed
         })
-    
-    else:
-        return redirect('Main_Login')
+
+    total_amount = subtotal + (shipping_cost * len(orders))  # Total after shipping
+
+    return render(request, 'user_profile/order_history.html', {
+        'orders': orders_data,
+        'subtotal': subtotal,
+        'total_amount': total_amount  
+    })
 
 # --------------------------------------------------------------------------------------
 @login_required
 def cancel_order(request, order_id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            order = Order.objects.get(id=order_id, user=request.user)
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
-            if order.status != 'pending':
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Only pending orders can be cancelled'
-                }, status=400)
+    try:
+        data = json.loads(request.body)
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        if order.status != 'pending':
+            return JsonResponse({'status': 'error', 'message': 'Only pending orders can be cancelled'}, status=400)
 
-            with transaction.atomic():
-                for item in order.items.all():
-                    item.product.stock += item.quantity
-                    item.product.save()
+        with transaction.atomic():
+            for item in order.items.all():
+                item.product.stock += item.quantity
+                item.product.save()
 
-                if order.payment_method == "wallet":
-                    user_wallet, created = Wallet.objects.get_or_create(user=request.user)
-                    user_wallet.balance += order.total_amount
-                    user_wallet.save()
+            if order.payment_method == "wallet":
+                user_wallet, _ = Wallet.objects.get_or_create(user=request.user)
+                user_wallet.balance += order.total
+                user_wallet.save()
 
-                order.status = Order.STATUS_CANCELLED
-                order.cancellation_reason = data.get('reason', 'No reason provided')
-                order.cancelled_at = timezone.now()
-                order.save()
+                transaction_record = WalletTransaction.objects.create(
+                    wallet=user_wallet,
+                    transaction_type="credit",
+                    amount=order.total
+                )
 
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Order cancelled successfully, amount refunded to wallet' if order.payment_status == "wallet" else 'Order cancelled successfully'
-            })
+            order.status = Order.STATUS_CANCELLED
+            order.cancellation_reason = data.get('reason', 'No reason provided')
+            order.cancelled_at = timezone.now()
+            order.save()
 
-        except Order.DoesNotExist:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Order not found'
-            }, status=404)
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=500)
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Order cancelled successfully, amount refunded to wallet' if order.payment_method == "wallet" else 'Order cancelled successfully'
+        })
 
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method'
-    }, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 # ------------------------------------------------------------------------------------
 @login_required
 def wallet(request):
     wallet, created = Wallet.objects.get_or_create(user=request.user)
-    transactions = WalletTransaction.objects.filter(wallet=wallet).order_by("-created_at")[:11]  
-    
+    transactions = WalletTransaction.objects.filter(wallet=wallet).order_by("-created_at")[:6]
     return render(request, "user_profile/wallet.html", {
         "wallet": wallet,
         "transactions": transactions
     })
-# ------------------------------------------------
+
+# ---------------------------------------------------------------------------------------
 @login_required
 def add_money(request):
     if request.method == "POST":
-        user = request.user
-        data = json.loads(request.body)
-        amount = data.get("amount")
+        amount = request.POST.get("amount", "0")
 
-        if not amount or amount <= 0:
-            return JsonResponse({"success": False, "message": "Invalid amount!"})
+        try:
+            amount = Decimal(amount)
+        except ValueError:
+            messages.error(request, "Invalid amount format. Please enter a valid number.")
+            return redirect("wallet")
 
-        wallet, created = Wallet.objects.get_or_create(user=user)
+        if amount <= 0 or amount >= Decimal("100000000"):
+            messages.error(request, "Amount must be between 0.01 and 99,999,999.99.")
+            return redirect("wallet")
+
+        wallet, created = Wallet.objects.get_or_create(user=request.user)
         wallet.balance += amount
         wallet.save()
 
-        return JsonResponse({"success": True, "message": "Money added successfully!", "balance": wallet.balance})
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type="credit",
+            amount=amount
+        )
 
-    return JsonResponse({"success": False, "message": "Invalid request method"})
+        messages.success(request, "Money added successfully!")
+        return redirect("wallet")
+
+    return redirect("wallet")
+
 # --------------------------------------------------------------------
 def generate_invoice(request, order_id):
     order = Order.objects.get(id=order_id)

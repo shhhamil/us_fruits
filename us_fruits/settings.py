@@ -101,16 +101,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'my_first_project',
-#         'USER': 'shammil',
-#         'PASSWORD': 'azan@123',
-#         'HOST': '127.0.0.1',   
-#         'PORT': '5432',        
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -141,25 +131,22 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-# for payment 
-# -------------------------------------------
-# RAZORPAY_KEY_ID = "rzp_test_3MlkMrHxnIPJDb"
-# RAZORPAY_KEY_SECRET = "qObVMA30JukLa3dk8CS3akqq"
 
-R_ID = os.getenv("KEY_ID")
-R_SECRET = os.getenv("KEY_SECRET")
 
+
+RAZORPAY_KEY_ID = os.getenv("KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("KEY_SECRET")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Asia/Kolkata"  
+USE_TZ = True
 USE_I18N = True
 
-USE_TZ = True
+
+ 
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -192,16 +179,9 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # OTP SESSION ==========================================
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'mohammedshhamil2@gmail.com'
-# EMAIL_HOST_PASSWORD = 'usks xjmt zmrd fetb'
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # Default to 587 if not found
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

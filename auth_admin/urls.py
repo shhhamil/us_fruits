@@ -22,14 +22,19 @@ urlpatterns = [
     # ____________________________________________________________---_____________________________-
     path('orders/',views.order_management, name='Order_Management'),
     path('order/<int:orderId>/update-status/',views.update_order_status, name='Change_Status'),
-    path('order/details/<int:order_id>/', views.get_order_details, name='get_order_details'),
+    path('order/details/<int:order_id>/',views.get_order_details, name='order-details'),
     # __________________________________________________________________________________________________
     path('sales/', views.sales_report, name='sales_report'),
     path('sales/export/pdf/', views.export_sales_pdf, name='export_sales_pdf'),
     path('sales/export/excel/', views.export_sales_excel, name='export_sales_excel'),
     path('sales/filter/<str:period>/',views.filter_sales, name='filter_sales'),
     path('sales/filter/custom/', views.filter_custom_date, name='filter_custom_date'),
- 
+    # _____________________________________________________________________________________________
+    path("coupons/",views.coupon_list, name="coupon_list"),
+    path("coupons/add/", views.add_coupon, name="add_coupon"),
+    path('edit/<int:coupon_id>/', views.edit_coupon, name='edit_coupon'),
+    path("coupons/delete/<int:coupon_id>/", views.delete_coupon, name="delete_coupon"),
+
 
 
 

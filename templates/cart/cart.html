@@ -538,17 +538,20 @@
                 <div class="cart-summary">
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span class="cart-subtotal">₹{{ total_price }}</span>
+                        <span class="cart-subtotal">₹{{ subtotal|floatformat:2 }}</span>
                     </div>
                     <div class="summary-row">
                         <span>Shipping</span>
-                        <span>₹30</span>
+                        <span>₹{{ shipping_cost }}</span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span class="cart-total">₹{{ total_price|add:30 }}</span>
+                        <span class="cart-total">₹{{ total_price|floatformat:2 }}</span>
                     </div>
                 </div>
+            </div>
+            
+            
                 <form action="{% url 'checkout' %}" method="get">
                     <button type="submit" class="checkout-btn">
                         <i class="fas fa-lock"></i> Checkout

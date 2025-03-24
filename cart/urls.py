@@ -16,6 +16,8 @@ urlpatterns = [
 # ------------------------------------------------------------------------------
     path("create-order/", views.create_order, name="create_order"),
     path("place_order_with_wallet/<int:order_id>/", views.place_order_with_wallet, name="place_order_with_wallet"),
+    # ------------------------------------------------------------------------------
+    path('apply_coupon/', views.apply_coupon, name='apply_coupon'), 
 
 ]
 

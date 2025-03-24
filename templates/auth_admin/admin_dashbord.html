@@ -216,11 +216,69 @@
             background-color: #f0f0f0;
         }
 
-        /* Responsive Improvements */
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Responsive Table */
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .responsive-table th, 
+        .responsive-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .responsive-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .responsive-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .responsive-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .rank-badge {
+            background: #007bff;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
         @media (max-width: 768px) {
-            .content-header {
-                flex-direction: column;
-                gap: 15px;
+            .responsive-table {
+                display: block;
+                overflow-x: auto;
             }
         }
     </style>
@@ -269,9 +327,8 @@
                         <span class="menu-text"> Sales Report</span>
                     </a>
                 </li>
-                
                 <li class="menu-item">
-                    <a class="menu-link" href="#">
+                    <a class="menu-link" href="{% url  'coupon_list' %}">
                         <span class="menu-icon">&#128176;</span> 
                         <span class="menu-text">Coupons Management</span>
                     </a>
@@ -303,6 +360,48 @@
                 <h2 class="content-title">Dashboard</h2>               
             </div>
         </section>
+
+        <div class="dashboard-container">
+            <h2>Most Popular Products</h2>
+            <table class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Product Name</th>
+                        <th>Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in popular_products %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ product.name }}</td>
+                            <td><span class="rank-badge">{{ product.order_count }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h2>Most Popular Categories</h2>
+            <table class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Category Name</th>
+                        <th>Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in popular_categories %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ category.name }}</td>
+                            <td><span class="rank-badge">{{ category.order_count }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <script>
@@ -310,13 +409,23 @@
         document.querySelector('.toggle-btn').addEventListener('click', function () {
             document.querySelector('.sidebar').classList.toggle('collapsed');
             document.querySelector('.main-wrap').classList.toggle('expanded');
-        });     
+        });
 
         // Profile Dropdown Toggle
         function toggleDropdown() {
             const dropdown = document.getElementById('profileDropdown');
             dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
         }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.matches('.dropdown-toggle') && !e.target.matches('.nav-icon')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            }
+        });
     </script>
 </body>
 </html>

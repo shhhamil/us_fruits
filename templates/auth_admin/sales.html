@@ -26,18 +26,18 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         :root {
-            --primary-color: #2563eb;
+            --primary-color:rgb(0, 0, 0);
             --text-color: #333;
             --bg-color: #f5f5f5;
             --sidebar-width: 250px;
             --sidebar-collapsed-width: 70px;
             --header-height: 60px;
             --transition-speed: 0.3s;
-            --accent-color: #82ae46; /* US Fruits green accent */
+            --accent-color:rgb(0, 0, 0); /* US Fruits green accent */
         }
 
         body {
@@ -546,7 +546,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="#">
+                    <a class="menu-link" href="{% url  'coupon_list' %}">
                         <span class="menu-icon">&#128176;</span> 
                         <span class="menu-text">Coupons Management</span>
                     </a>
