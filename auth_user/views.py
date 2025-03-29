@@ -1,37 +1,24 @@
 # -------------------------------------------Imported items --------------------------------------------------
-from django.shortcuts import render,redirect
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate,login,logout
-from django.contrib import messages
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
-from django.utils.timezone import now
-from datetime import timedelta
 import re
 from django.conf import settings
 from django.core.paginator import Paginator
-import random
 from auth_admin.models import Product
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
-from django.utils.timezone import now
 from django.utils.dateparse import parse_datetime
-from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.contrib import messages
-from django.views.decorators.cache import never_cache
-import random
 from django.utils.timezone import now
 from datetime import timedelta
 import random
 from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from user_profile.models import Wallet
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.views.decorators.cache import never_cache
 User = get_user_model()
 #-------------------------------------------- Home page-------------------------------------------------------
 @never_cache
@@ -240,7 +227,6 @@ def forgot_password(request):
         return redirect('Otp')
     return render(request, 'auth_user/forgot.html')
 def send_otp_email(email, otp):
-#     Sends OTP email for password reset.
     subject = "Your Password Reset OTP"
     message = f"Your OTP for password reset is {otp}. It is valid for 10 minutes."
     from_email = settings.EMAIL_HOST_USER

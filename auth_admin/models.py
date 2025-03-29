@@ -5,7 +5,6 @@ from django.utils.timezone import now
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractUser
-from django.db.models import F, Sum
 from django.utils.translation import gettext_lazy as _
 import os 
 from django.core.exceptions import ValidationError
@@ -201,7 +200,7 @@ class Order(models.Model):
         total = sum(item.get_total_offer_price for item in self.items.all())
 
         discount = 0
-        if self.coupon and self.coupon.is_active and self.coupon.valid_from <= now() <= self.coupon.valid_to:
+        if self.coupon and self.coupon.is_deleted and self.coupon.start_date <= now() <= self.coupon.end_date:
             discount = (total * self.coupon.discount) / 100 if self.coupon.discount else 0
 
         self.discount_amount = discount
@@ -209,12 +208,21 @@ class Order(models.Model):
         self.save()
 
 # ======================================Order Items =============================================================
-
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")   
     product = models.ForeignKey('Product', on_delete=models.PROTECT)    
     quantity = models.PositiveIntegerField(default=1)     
     price = models.DecimalField(max_digits=10, decimal_places=2)  
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Pending"),
+            ("shipped", "Shipped"),
+            ("delivered", "Delivered"),
+            ("canceled", "Canceled")
+        ],
+        default="pending",
+    )
 
     def __str__(self):
         return f"{self.quantity}x {self.product.name} (₹{self.price}) in Order {self.order.id}"
@@ -230,7 +238,14 @@ class OrderItem(models.Model):
             category_offer_price = self.product.category.offer_price
             product_offer_price = min(product_offer_price, category_offer_price)
 
-        return product_offer_price * self.quantity
+        return product_offer_price * self.quantity  
+
+    def cancel(self):
+        """Cancel this specific product in the order."""
+        if self.status != "canceled":
+            self.status = "canceled"
+            self.save()
+
 # -------------------------------------------------------------------------------------------
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)  

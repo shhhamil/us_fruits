@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Order Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #303f9f;
+            --accent-color: #5c6bc0;
+            --background-light: #f5f5f5;
+            --background-white: #ffffff;
+            --text-dark: #212121;
+            --text-medium: #424242;
+            --text-light: #757575;
+            --border-light: #e0e0e0;
+            --border-radius: 8px;
+            --border-radius-sm: 6px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
+            --danger-color: #d32f2f;
+            --warning-color: #f57c00;
+            --success-color: #2e7d32;
+            --info-color: #0288d1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .admin-order-details-container {
+            max-width: 1200px;
+            margin: 1rem auto;
+            background: var(--background-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+
+        .admin-order-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .admin-order-header-info h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .admin-order-header-info span {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .admin-order-header-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .admin-order-tracker {
+            text-align: center;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        .admin-order-tracker h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .admin-progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .admin-tracker-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            z-index: 1;
+        }
+
+        .admin-tracker-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 16px;
+            color: #fff;
+            background: var(--text-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .completed .admin-tracker-icon {
+            background: var(--primary-color);
+        }
+
+        .active .admin-tracker-icon {
+            background: var(--secondary-color);
+        }
+
+        .admin-tracker-status {
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .admin-tracker-line {
+            position: absolute;
+            top: 20px;
+            height: 3px;
+            width: 100%;
+            background: var(--text-light);
+            z-index: 0;
+            left: -50%;
+        }
+
+        .completed .admin-tracker-line {
+            background: var(--primary-color);
+        }
+
+        .admin-order-details-section {
+            padding: 1.5rem;
+        }
+
+        .admin-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-details-card {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 1.2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .admin-details-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .admin-details-card p {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+        }
+
+        .admin-status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.3rem;
+        }
+
+        .admin-status-badge.paid {
+            background-color: rgba(46, 125, 50, 0.15);
+            color: var(--success-color);
+        }
+
+        .admin-status-badge.unpaid {
+            background-color: rgba(211, 47, 47, 0.15);
+            color: var(--danger-color);
+        }
+
+        .admin-section-title {
+            margin: 0 1.5rem 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Table Styles */
+        .admin-products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 1.5rem 1.5rem;
+        }
+
+        .admin-products-table th,
+        .admin-products-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .admin-products-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-products-table tr:nth-child(even) {
+            background-color: var(--background-light);
+        }
+
+        .admin-products-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .admin-product-image-cell {
+            width: 80px;
+        }
+
+        .admin-product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        .admin-product-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .admin-product-price {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .admin-product-quantity {
+            font-weight: 500;
+        }
+
+        .admin-product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .admin-btn {
+            padding: 0.5rem 0.8rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-btn-complaint {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .admin-btn-complaint.approved {
+            background-color: var(--success-color);
+        }
+
+        .admin-btn-complaint.pending {
+            background-color: var(--info-color);
+        }
+
+        .admin-btn-complaint.rejected {
+            background-color: var(--danger-color);
+        }
+
+        .admin-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .complaint-status {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin-left: 0.5rem;
+        }
+
+        .complaint-status.pending {
+            background-color: rgba(2, 136, 209, 0.15);
+            color: var(--info-color);
+        }
+
+        .complaint-status.approved {
+            background-color: rgba(46, 125, 50, 0.15);
+            color: var(--success-color);
+        }
+
+        .complaint-status.rejected {
+            background-color: rgba(211, 47, 47, 0.15);
+            color: var(--danger-color);
+        }
+
+        @media (max-width: 1200px) {
+            .admin-details-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .admin-order-header-actions {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 0.8rem;
+            }
+            
+            .admin-order-details-section {
+                padding: 1rem;
+            }
+            
+            .admin-products-table {
+                margin: 0 1rem 1rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .admin-products-table th,
+            .admin-products-table td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .admin-product-image-cell {
+                width: 60px;
+            }
+            
+            .admin-product-image {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-order-details-container">
+        <div class="admin-order-header">
+            <div class="admin-order-header-info">
+                <h2>Order Management</h2>
+                <span>Order ID: {{ order.id }} ({{ order.date_of_order }}) - Customer: {{ order.customer.name }}</span>
+            </div>
+            <div class="admin-order-header-actions">
+                <button class="admin-btn admin-btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    
+        <div class="admin-order-tracker">
+            <h3>Order Status</h3>
+            <div class="admin-progress-bar">
+                {% for status in order.STATUS_CHOICES %}
+                    <div class="admin-tracker-step {% if status.0 in completed_statuses %}completed{% elif status.0 == order.status %}active{% endif %}">
+                        <div class="admin-tracker-icon">
+                            {% if status.0 == 'pending' %}<i class="fas fa-shopping-cart"></i>
+                            {% elif status.0 == 'processing' %}<i class="fas fa-cog"></i>
+                            {% elif status.0 == 'shipped' %}<i class="fas fa-truck"></i>
+                            {% elif status.0 == 'delivered' %}<i class="fas fa-check-circle"></i>
+                            {% elif status.0 == 'cancelled' %}<i class="fas fa-times-circle"></i>
+                            {% endif %}
+                        </div>
+                        <span class="admin-tracker-status">{{ status.1 }}</span>
+                        {% if not forloop.first %}
+                            
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    
+        <div class="admin-order-details-section">
+            <div class="admin-details-grid">
+                <div class="admin-details-card">
+                    <h3><i class="fas fa-truck"></i> Delivery Information</h3>
+                    <p><i class="fas fa-user"></i> <strong>Customer:</strong> {{ order.customer.name }}</p>
+                    <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ order.customer.email }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong> {{ order.address.street }}, {{ order.address.city }}</p>
+                    <p><i class="fas fa-location-dot"></i> <strong>PIN Code:</strong> {{ order.address.pin_code }}</p>
+                    <p><i class="fas fa-phone"></i> <strong>Contact:</strong> {{ order.address.phone }}</p>
+                    {% if order.tracking_number %}
+                        <p><i class="fas fa-barcode"></i> <strong>Tracking #:</strong> {{ order.tracking_number }}</p>
+                    {% endif %}
+                </div>
+    
+                <div class="admin-details-card">
+                    <h3><i class="fas fa-credit-card"></i> Payment & Order Information</h3>
+                    <p><i class="fas fa-clock"></i> <strong>Order Date:</strong> {{ order.date_of_order }}</p>
+                    <p>
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Payment Status:</strong> 
+                        <span class="admin-status-badge {{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+                    </p>
+                    <p><i class="fas fa-money-bill-wave"></i> <strong>Total Price:</strong> ₹{{ order.total }}</p>
+                    <p><i class="fas fa-box"></i> <strong>Items:</strong> {{ order.items.count }}</p>
+                </div>
+            </div>
+        </div>
+    
+        <h3 class="admin-section-title">Order Items</h3>
+        <table class="admin-products-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Complaint Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="admin-product-image-cell">
+                                {% if item.product.photo_1 %}
+                                <img src="{{ item.product.photo_1.url }}" class="admin-product-image" alt="{{ item.product.name }}">
+                                {% else %}
+                                <img src="/placeholder.jpg" class="admin-product-image" alt="No image">
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="admin-product-name">{{ item.product.name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="admin-product-price">₹{{ item.price }}</td>
+                    <td class="admin-product-quantity">{{ item.quantity }}</td>
+                    <td>
+                        {% if item.complaint %}
+                        <button class="admin-btn admin-btn-complaint {{ item.complaint.status }}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>{{ item.complaint.get_status_display }}</span>
+                        </button>
+                        {% else %}
+                        <span style="color: var(--text-light); font-size: 0.8rem;">No complaint</span>
+                        {% endif %}
+                    </td>
+                   
+                </tr>
+                {% endfor %}
+                <tr style="background-color: var(--background-light);">
+                    <td colspan="3" style="text-align: right; font-weight: 600;">Subtotal:</td>
+                    <td style="font-weight: 600;">₹{{ order.subtotal }}</td>
+                  
+                </tr>
+                <tr style="background-color: var(--background-light);">
+                    <td colspan="3" style="text-align: right; font-weight: 600;">Shipping:</td>
+                    <td style="font-weight: 600;">₹{{ order.shipping_cost }}</td>
+                    <td></td>
+                </tr>
+                <tr style="background-color: var(--primary-color); color: white;">
+                    <td colspan="3" style="text-align: right; font-weight: 600;">Total:</td>
+                    <td style="font-weight: 600;">₹{{ order.total }}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+</body>
+</html>

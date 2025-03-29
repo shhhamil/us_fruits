@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #82ae46;
+            --light-green: #a0c25a;
+            --dark-green: #6b9c3e;
+            --red-reject: #e74c3c;
+            --background-color: #f7f7f7;
+            --text-color: #333;
+            --white: #ffffff;
+            --gray-background: #f1f1f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .complaint-details-wrapper {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .complaint-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: var(--white);
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .complaint-header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .complaint-header i {
+            font-size: 2rem;
+        }
+
+        .complaint-content {
+            padding: 30px;
+        }
+
+        .detail-section {
+            background-color: var(--gray-background);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .detail-item strong {
+            width: 150px;
+            color: var(--primary-green);
+            margin-right: 15px;
+        }
+
+        .complaint-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .approve-btn {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
+
+        .approve-btn:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(130, 174, 70, 0.3);
+        }
+
+        .reject-btn {
+            background-color: var(--red-reject);
+            color: var(--white);
+        }
+
+        .reject-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(192, 57, 43, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        @media screen and (max-width: 600px) {
+            .complaint-details-wrapper {
+                border-radius: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .complaint-content {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .detail-item strong {
+                margin-bottom: 5px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="complaint-details-wrapper">
+        <div class="complaint-header">
+            <h1>
+                <i class="fas fa-file-alt"></i>
+                Complaint Details
+            </h1>
+        </div>
+        <div class="complaint-content">
+            <div class="detail-section">
+                <div class="detail-item">
+                    <strong><i class="fas fa-shopping-cart"></i> Order ID:</strong>
+                    <span>{{ complaint.order.id }}</span>
+                </div>
+                <div class="detail-item">
+                    <strong><i class="fas fa-envelope"></i> User Email:</strong>
+                    <span>{{ complaint.order.user.email }}</span>
+                </div>
+            </div>
+    
+            <div class="detail-section">
+                <div class="detail-item">
+                    <strong><i class="fas fa-comment-dots"></i> Description:</strong>
+                </div>
+                <p>{{ complaint.description }}</p>
+            </div>
+    
+            {% if complaint.image %}
+            <div class="detail-section">
+                <div class="detail-item">
+                    <strong><i class="fas fa-image"></i> Complaint Image:</strong>
+                </div>
+                <img src="{{ complaint.image.url }}" alt="Complaint Photo" class="complaint-image">
+            </div>
+            {% else %}
+            <div class="detail-section">
+                <p><i>No image uploaded for this complaint.</i></p>
+            </div>
+            {% endif %}
+    
+            <div class="action-buttons">
+                <a href="{% url 'approve_complaint' complaint.id %}" class="btn approve-btn">
+                    <i class="fas fa-check-circle"></i> Approve Refund
+                </a>
+                <a href="{% url 'reject_complaint' complaint.id %}" class="btn reject-btn">
+                    <i class="fas fa-times-circle"></i> Reject Complaint
+                </a>
+            </div>
+            
+        </div>
+    </div>
+    
+</body>
+</html>

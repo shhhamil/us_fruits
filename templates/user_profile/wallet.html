@@ -566,36 +566,115 @@
         </div>
     </div>
     
-    <!-- Add Money Modal -->
-    <div class="modal fade" id="addMoneyModal" tabindex="-1" role="dialog" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+<!-- Add Money Modal -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1" role="dialog" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="amountInput">Amount</label>
+                    <input type="number" id="amountInput" name="amount" placeholder="Enter amount" min="1">
                 </div>
-                <div class="modal-body">
-                    <form method="POST" action="{% url 'add_money' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="amount">Amount</label>
-                            <input type="number" class="form-control" id="amount" name="amount" min="1" placeholder="Enter amount" required>
-                        </div>
-    
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-plus"></i>
-                            Add Money
-                        </button>
-                    </form>
-                </div>
+
+                <button type="button" class="submit-btn">
+                    <i class="fas fa-plus"></i> Add Money
+                </button>
             </div>
         </div>
-    </div>  
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var addMoneyBtn = document.querySelector(".submit-btn");
+        if (addMoneyBtn) {
+            addMoneyBtn.addEventListener("click", addMoney);
+        }
+    });
+    
+    function addMoney() {
+        var amount = document.getElementById("amountInput").value;
+    
+        if (!amount || isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount!");
+            return;
+        }
+    
+        fetch(`/add-money/${amount}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+    
+            var options = {
+                "key": data.key,
+                "amount": data.amount,  // Razorpay amount in paisa
+                "currency": "INR",
+                "order_id": data.order_id,
+                "name": "Your Website",
+                "description": "Wallet Top-up",
+                "handler": function (response) {
+                    fetch("/payment-success/", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            amount: data.amount  // Sending amount in paisa
+                        }),
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCSRFToken()  // CSRF Token Handling
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.error) {
+                            alert("Error: " + res.error);
+                        } else {
+                            alert(res.message);
+                            location.reload(); // Refresh page after successful wallet update
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                }
+            };
+    
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        })
+        .catch(error => console.error("Error:", error));
+    }
+    
+    // ✅ Function to Get CSRF Token from Cookies
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith("csrftoken=")) {
+                    cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+    
+
+
+
 {% endblock %}

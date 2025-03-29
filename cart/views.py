@@ -34,11 +34,7 @@ def cart(request):
     cart_items = CartItem.objects.filter(cart=cart).select_related('product').order_by('product__name')
 
     subtotal = cart_items.aggregate(
-        total=Sum(
-            ExpressionWrapper(
-                F('quantity') * F('product__offer_price'),
-                output_field=DecimalField())))['total'] or 0 
-
+        total=Sum(ExpressionWrapper(F('quantity') * F('product__offer_price'),output_field=DecimalField())))['total'] or 0 
     shipping_cost = getattr(settings, 'SHIPPING_COST', 30)  
     total_price = subtotal + shipping_cost  
     context = {
@@ -288,9 +284,7 @@ def place_order(request):
         payment_method = data.get('payment_method')
         razorpay_payment_id = data.get("razorpay_payment_id")
 
-#this for  Retrieve applied coupon and discount from the apply coupon viwes session 
-        applied_coupon_code = request.session.get("applied_coupon_code")
-        discount_amount = request.session.get("discount_amount", 0)
+        logger.info(f"🛒 Placing Order | Address: {address_id}, Payment: {payment_method}, Razorpay ID: {razorpay_payment_id}")
 
         cart = get_object_or_404(Cart, user=request.user)
         cart_items = CartItem.objects.filter(cart=cart)
@@ -299,6 +293,9 @@ def place_order(request):
 
         cart_total = sum(item.quantity * item.product.offer_price for item in cart_items)
         shipping_cost = getattr(settings, "SHIPPING_COST", 30)
+
+        applied_coupon_code = request.session.get("applied_coupon_code")
+        discount_amount = request.session.get("discount_amount", 0)
 
         applied_coupon = None
         if applied_coupon_code:
@@ -316,22 +313,8 @@ def place_order(request):
 
         if payment_method == "razorpay":
             if not razorpay_payment_id:
+                logger.error(" Razorpay payment ID is missing")
                 return JsonResponse({'success': False, 'message': 'Use the "Pay with Razorpay" button instead.'})
-            try:
-                razorpay_client.payment.fetch(razorpay_payment_id)
-            except razorpay.errors.BadRequestError:
-                return JsonResponse({'success': False, 'message': 'Invalid Razorpay payment ID.'})
-
-        if payment_method == "wallet":
-            user_wallet, _ = Wallet.objects.get_or_create(user=request.user)
-            if user_wallet.balance < total_amount:
-                return JsonResponse({'success': False, 'message': 'Insufficient wallet balance.'})
-
-        payment_status = 'paid' if payment_method in ['razorpay', 'wallet'] else 'unpaid'
-
-        for item in cart_items:
-            if item.product.stock < item.quantity:
-                return JsonResponse({'success': False, 'message': f'Not enough stock for {item.product.name}.'})
 
         with transaction.atomic():
             address = get_object_or_404(Address, id=address_id)
@@ -339,29 +322,22 @@ def place_order(request):
             order = Order.objects.create(
                 user=request.user,
                 address=address,
-                total=total_amount, 
+                total=total_amount,
                 shipping_cost=shipping_cost,
-                payment_status=payment_status,
+                payment_status='paid',
                 payment_method=payment_method,
                 discount_amount=discount_amount,  
                 coupon=applied_coupon
             )
 
-            if payment_method == "razorpay":
-                order.razorpay_payment_id = razorpay_payment_id
-                order.save()
-
-            if payment_method == "wallet":
-                user_wallet.balance -= total_amount
-                user_wallet.save()
-                WalletTransaction.objects.create(
-                    wallet=user_wallet,
-                    transaction_type="debit",
-                    amount=total_amount
-                )
+            order.razorpay_payment_id = razorpay_payment_id
+            order.save()
 
             for item in cart_items:
                 product = item.product
+                if item.quantity > product.stock:
+                    return JsonResponse({'success': False, 'message': f'Not enough stock for {product.name}.'})
+
                 OrderItem.objects.create(
                     order=order,
                     product=product,
@@ -371,13 +347,11 @@ def place_order(request):
                 product.stock -= item.quantity
                 product.save()
 
-
             cart_items.delete()
-
-# it for Remove Coupon Data from Session
             request.session.pop("applied_coupon_code", None)
             request.session.pop("discount_amount", None)
 
+        logger.info(f"✅ Order Placed Successfully | Order ID: {order.id}")
         return JsonResponse({'success': True, 'redirect_url': '/order-history/'})
 
     except Exception as e:
@@ -451,6 +425,7 @@ def place_order_with_wallet(request):
             with transaction.atomic():
                 wallet.balance -= total_amount
                 wallet.save()
+
 
                 order = Order.objects.create(
                     user=user,

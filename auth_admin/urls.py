@@ -23,6 +23,12 @@ urlpatterns = [
     path('orders/',views.order_management, name='Order_Management'),
     path('order/<int:orderId>/update-status/',views.update_order_status, name='Change_Status'),
     path('order/details/<int:order_id>/',views.get_order_details, name='order-details'),
+
+    path('complaint/<int:complaint_id>/', views.admin_view_complaint, name='admin_view_complaint'),
+    path('complaint/<int:complaint_id>/approve/', views.approve_complaint, name='approve_complaint'),
+    path('complaint/<int:complaint_id>/reject/', views.reject_complaint, name='reject_complaint'),
+
+
     # __________________________________________________________________________________________________
     path('sales/', views.sales_report, name='sales_report'),
     path('sales/export/pdf/', views.export_sales_pdf, name='export_sales_pdf'),

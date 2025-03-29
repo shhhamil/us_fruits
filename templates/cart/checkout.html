@@ -793,7 +793,7 @@
                             handler: async function (response) {
                                 console.log("✅ Payment Success:", response);
                 
-                                const res = await fetch("/place_order/", {
+                                const res = await fetch("/place-order/", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
@@ -877,10 +877,16 @@
             
                 // ✅ Handle Wallet Payment
                 async function processWalletPayment(addressId) {
-                    let csrfToken = "{{ csrf_token }}";
-            
+                    let csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']")?.value;
+                
+                    if (!csrfToken) {
+                        console.error("❌ CSRF Token not found.");
+                        showNotification("Security error: Missing CSRF token.", "error");
+                        return;
+                    }
+                
                     try {
-                        const response = await fetch("{% url 'place_order' %}", {
+                        const response = await fetch("/place-order/", {  // <-- Ensure this URL is correct
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -891,8 +897,10 @@
                                 payment_method: "wallet",
                             }),
                         });
-            
+                
                         const data = await response.json();
+                        console.log("✅ Wallet Payment Response:", data);
+                
                         if (data.success) {
                             showSuccessModal();
                             setTimeout(() => {
@@ -902,10 +910,11 @@
                             showNotification(data.message || "Failed to process wallet payment.", "error");
                         }
                     } catch (error) {
-                        console.error("Error:", error);
+                        console.error("❌ Wallet Payment Error:", error);
                         showNotification("Failed to process wallet payment. Please try again.", "error");
                     }
                 }
+                
             
                 // ✅ Show Success Modal
                 function showSuccessModal() {

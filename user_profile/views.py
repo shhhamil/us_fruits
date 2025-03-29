@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from django.contrib.auth.models import User
 from django.contrib.auth import update_session_auth_hash
+from user_profile.models import Complaint
 from django.contrib.auth.decorators import login_required
-from reportlab.lib import colors
 from decimal import Decimal
+from reportlab.lib import colors
+import razorpay
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph , Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -160,16 +163,24 @@ def set_default_address(request, address_id):
 # --------------------------------------------------------------------------------------------------------------
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-id').select_related('user')
+    orders = (
+        Order.objects
+        .filter(user=request.user)
+        .order_by('-id')
+        .select_related('user')
+        .prefetch_related('items__product', 'complaints')   
+    )
 
     subtotal = 0  
-    orders_data = []
-
-    shipping_cost = 30  # Modify if it's dynamic per order
+    orders_data = []  
+    shipping_cost = 30  
 
     for order in orders:
-        order_total = order.total - (order.discount_amount or 0)  # Ensure discount is subtracted
+        order_total = order.total - (order.discount_amount or 0)   
         subtotal += order_total  
+
+
+        complaint = order.complaints.first() if hasattr(order, 'complaints') else None  
 
         orders_data.append({
             'id': order.id,
@@ -181,10 +192,13 @@ def order_history(request):
             'items': order.items.all(),
             'discount': order.discount_amount or 0,  
             'shipping_cost': shipping_cost,
-            'final_total': order_total + shipping_cost,  # If needed
+            'final_total': order_total + shipping_cost,
+            'complaint_status': complaint.status_complaint if complaint else None,  
+            'complaint_id': complaint.id if complaint else None  
         })
 
-    total_amount = subtotal + (shipping_cost * len(orders))  # Total after shipping
+    total_amount = subtotal + (shipping_cost * len(orders))  
+    print(orders_data)  
 
     return render(request, 'user_profile/order_history.html', {
         'orders': orders_data,
@@ -192,9 +206,11 @@ def order_history(request):
         'total_amount': total_amount  
     })
 
+
 # --------------------------------------------------------------------------------------
 @login_required
 def cancel_order(request, order_id):
+    print(f'order {order_id}')
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -232,49 +248,133 @@ def cancel_order(request, order_id):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+# -------------------------------------------------------------------------------------------------    
+@csrf_exempt
+def cancel_order_item(request, item_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            reason = data.get("reason")
+
+            if not reason:
+                return JsonResponse({"success": False, "error": "No reason provided"}, status=400)
+
+            order_item = OrderItem.objects.get(id=item_id)
+
+            if order_item.status != "pending":
+                return JsonResponse({"success": False, "error": "Order cannot be cancelled"}, status=400)
+
+            user = order_item.order.user
+            wallet, _ = Wallet.objects.get_or_create(user=user)
+
+            total_refund = order_item.price * order_item.quantity
+            wallet.deposit(total_refund)
+
+            order_item.product.stock += order_item.quantity
+            order_item.product.save()
+
+            order_item.status = "cancelled"
+            order_item.cancel_reason = reason
+            order_item.save()
+
+            order = order_item.order
+            remaining_items = order.orderitem_set.filter(status="pending")
+
+            if not remaining_items.exists():
+                if hasattr(order, "shipping_cost"):
+                    shipping_cost = order.shipping_cost
+                    wallet.deposit(shipping_cost)
+                    total_refund += shipping_cost
+
+                order.status = "cancelled"
+                order.save()
+
+            return JsonResponse({"success": True, "message": f"Order cancelled. ₹{total_refund} credited to wallet, stock updated."})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+
+# -------------------------------------------------------------------------------------
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'user_profile/view_order.html', {'order': order})
+
 # ------------------------------------------------------------------------------------
 @login_required
 def wallet(request):
     wallet, created = Wallet.objects.get_or_create(user=request.user)
-    transactions = WalletTransaction.objects.filter(wallet=wallet).order_by("-created_at")[:6]
+    transactions = WalletTransaction.objects.filter(wallet=wallet).order_by("-created_at")[:10]
     return render(request, "user_profile/wallet.html", {
         "wallet": wallet,
         "transactions": transactions
     })
 
 # ---------------------------------------------------------------------------------------
+razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+def add_money(request, amount):
+    try:
+        if amount <= 0:
+            return JsonResponse({"error": "Invalid amount"}, status=400)
+
+        data = {
+            "amount": amount * 100,  
+            "currency": "INR",
+            "payment_capture": "1",
+        }
+        order = razorpay_client.order.create(data)
+
+        return JsonResponse({
+            "key": settings.RAZORPAY_KEY_ID,
+            "amount": amount * 100,
+            "currency": "INR",
+            "order_id": order["id"],
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+# -------------------------------------------------------------------------------
+@csrf_exempt
 @login_required
-def add_money(request):
+def payment_success(request):
     if request.method == "POST":
-        amount = request.POST.get("amount", "0")
-
         try:
-            amount = Decimal(amount)
-        except ValueError:
-            messages.error(request, "Invalid amount format. Please enter a valid number.")
-            return redirect("wallet")
+            data = json.loads(request.body.decode("utf-8"))
+            user = request.user
+            wallet, created = Wallet.objects.get_or_create(user=user)
 
-        if amount <= 0 or amount >= Decimal("100000000"):
-            messages.error(request, "Amount must be between 0.01 and 99,999,999.99.")
-            return redirect("wallet")
+            razorpay_payment_id = data.get("razorpay_payment_id")
+            amount = data.get("amount")
 
-        wallet, created = Wallet.objects.get_or_create(user=request.user)
-        wallet.balance += amount
-        wallet.save()
+            if not amount:
+                return JsonResponse({"error": "Amount is missing"}, status=400)
 
-        WalletTransaction.objects.create(
-            wallet=wallet,
-            transaction_type="credit",
-            amount=amount
-        )
+            amount = Decimal(amount) / 100  
 
-        messages.success(request, "Money added successfully!")
-        return redirect("wallet")
+            try:
+                razorpay_client.payment.fetch(razorpay_payment_id)  
+                wallet.balance += amount
+                wallet.save()
 
-    return redirect("wallet")
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    amount=amount,
+                    transaction_type="credit"
+                )
 
+                return JsonResponse({"message": "Wallet updated successfully", "new_balance": str(wallet.balance)})
+            except Exception:
+                return JsonResponse({"error": "Payment verification failed"}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 # --------------------------------------------------------------------
 def generate_invoice(request, order_id):
+
+
     order = Order.objects.get(id=order_id)
     shipping_cost = 30  
     final_total = order.total + shipping_cost  
@@ -351,3 +451,33 @@ def generate_invoice(request, order_id):
     elements.append(Paragraph("<b> Thank you for shopping with us!!!</b>", styles["Heading3"]))
     pdf.build(elements)
     return response
+# ------------------------------------------------------
+@login_required
+def submit_complaint(request, order_id, item_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    item = get_object_or_404(OrderItem, id=item_id, order=order)
+
+    if item.complaints.exists():
+        messages.warning(request, "You have already submitted a complaint for this item.")
+        return redirect('order_detail', order_id=order.id)
+
+    if request.method == "POST":
+        image = request.FILES.get('image')
+        description = request.POST.get('description')
+
+        if not image or not description:
+            messages.error(request, "Image and description are required!")
+            return redirect('submit_complaint', order_id=order.id, item_id=item.id)
+
+        complaint = Complaint.objects.create(
+            order=order,
+            item=item,
+            image=image,
+            description=description,
+            status_complaint='pending'
+        )
+        messages.success(request, "Complaint submitted successfully. It is now pending review.")
+        return redirect('order_detail', order_id=order.id)
+
+    return render(request, "user_profile/complaint.html", {"order": order, "item": item})
+

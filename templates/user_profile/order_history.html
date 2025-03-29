@@ -10,7 +10,6 @@
     display: flex;
     min-height: calc(100vh - 76px);
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    margin-top: 76px;
     position: relative;
 }
 
@@ -1224,7 +1223,7 @@
             <div class="table-container">
                 <table class="order-table">
                     <thead>
-                        <tr class='table-head'>
+                        <tr class="table-head">
                             <th>Order ID</th>
                             <th>Products</th>
                             <th>Order Date</th>
@@ -1239,6 +1238,7 @@
                             <td class="order-id">
                                 <span class="id-badge">{{ order.id }}</span>
                             </td>
+                
                             <td class="product-cell">
                                 <div class="product-list">
                                     {% for item in order.items.all %}
@@ -1252,30 +1252,28 @@
                                     {% endfor %}
                                 </div>
                             </td>
-                    
+                
                             <td class="date-cell">{{ order.date_of_order }}</td>
+                
                             <td class="status-cell">
                                 <span class="status-badge {{ order.status|lower }}">
                                     {{ order.status }}
                                 </span>
                             </td>
+                
                             <td class="payment-cell">
                                 <span class="payment-badge {{ order.payment_method|lower }}">
                                     {{ order.payment_method }}
                                 </span>
                             </td>
+                
+                            <!-- Actions Column -->
                             <td class="actions-cell">
-                                <button class="action-btn view-btn" onclick="viewOrder({{ order.id }})" title="View Order">
+                                <a href="{% url 'order_detail' order.id %}" class="action-btn view-btn" title="View Order">
                                     <i class="fas fa-eye"></i>
-                                </button>
-    
-                                {% if order.status|lower == 'pending' %}
-                                <button class="action-btn cancel-btn" onclick="cancelOrder({{ order.id }})" title="Cancel Order">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                {% endif %}
-    
-                                <!-- Invoice Download Button -->
+                                </a>
+                                
+                
                                 <a href="{% url 'generate_invoice' order.id %}" class="action-btn invoice-btn" title="Download Invoice">
                                     <i class="fas fa-file-pdf"></i>
                                 </a>
@@ -1283,7 +1281,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="empty-state">
+                            <td colspan="6" class="empty-state">
                                 <div class="empty-content">
                                     <i class="fas fa-shopping-bag"></i>
                                     <h3>No Orders Yet</h3>
@@ -1295,341 +1293,35 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                
+                
+                
+                
+                
             </div>
         </div>
     </div>
     
-    <!-- Order Details Modal -->
-    <div id="orderModal" class="order-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Order<span id="modalOrderId"></span></h3>
-                <button class="close-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <!-- Enhanced Order Status Timeline -->
-                <div class="order-status-section">
-                    <div class="timeline" id="orderTimeline">
-                        <div class="timeline-item" id="pending">
-                            <div class="timeline-point"></div>
-                            <i class="fas fa-shopping-cart"></i>
-                            <h4>Order Placed</h4>
-                            <p class="date"></p>
-                        </div>
-                        <div class="timeline-item" id="processing">
-                            <div class="timeline-point"></div>
-                            <i class="fas fa-cog"></i>
-                            <h4>Processing</h4>
-                            <p class="date"></p>
-                        </div>
-                        <div class="timeline-item" id="shipped">
-                            <div class="timeline-point"></div>
-                            <i class="fas fa-truck"></i>
-                            <h4>Shipped</h4>
-                            <p class="date"></p>
-                        </div>
-                        <div class="timeline-item" id="delivered">
-                            <div class="timeline-point"></div>
-                            <i class="fas fa-check-circle"></i>
-                            <h4>Delivered</h4>
-                            <p class="date"></p>
-                        </div>
-                        <div class="timeline-item cancelled" id="cancelled">
-                            <div class="timeline-point"></div>
-                            <i class="fas fa-times-circle"></i>
-                            <h4>Cancelled</h4>
-                            <p class="date"></p>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Order Details Grid -->
-                <div class="order-details-section">
-                    <div class="details-grid">
-                        <div class="detail-card">
-                            <h4><i class="fas fa-map-marker-alt"></i> Delivery Address</h4>
-                            <div id="deliveryAddress" class="detail-content"></div>
-                        </div>
-                        <div class="detail-card">
-                            <h4><i class="fas fa-coins"></i> Payment Information</h4>
-                            <div id="paymentInfo" class="detail-content"></div>
-                        </div>
-                    </div>
-                </div>
-
-                                </div>
-                </div>
-            </div>
-        </div>
-                </div>
-
-    <!-- Cancel Order Modal -->
-    <div id="cancelOrderModal" class="order-modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header" style="background: #dc2626;">
-                <h3><i class="fas fa-exclamation-circle"></i> Cancel Order <span id="cancelOrderId"></span></h3>
-                <button class="close-modal" onclick="closeCancelModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-                        </div>
-            <div class="modal-body">
-                <div class="mb-4">
-                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Please select a reason for cancellation:</h4>
-                    <p style="color: #718096; font-size: 0.9rem;">This will help us improve our service.</p>
-                        </div>
-                <div class="cancel-reasons">
-                    <div class="reason-option">
-                        <input type="radio" name="cancelReason" id="reason1" value="Changed my mind">
-                        <label for="reason1">
-                            <span class="reason-text">Changed my mind</span>
-                            <span class="reason-desc">I no longer want this order</span>
-                        </label>
-                        </div>
-                    <div class="reason-option">
-                        <input type="radio" name="cancelReason" id="reason2" value="Ordered by mistake">
-                        <label for="reason2">
-                            <span class="reason-text">Ordered by mistake</span>
-                            <span class="reason-desc">I made a mistake while ordering</span>
-                        </label>
-                    </div>
-                    <div class="reason-option">
-                        <input type="radio" name="cancelReason" id="reason3" value="Found better price elsewhere">
-                        <label for="reason3">
-                            <span class="reason-text">Found better price elsewhere</span>
-                            <span class="reason-desc">I found the same product at a better price</span>
-                        </label>
-                </div>
-                    <div class="reason-option">
-                        <input type="radio" name="cancelReason" id="reason4" value="Other">
-                        <label for="reason4">
-                            <span class="reason-text">Other reason</span>
-                            <span class="reason-desc">None of the above reasons</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-cancel-confirm" onclick="confirmCancelOrder()">
-                        <i class="fas fa-check"></i>
-                        Confirm Cancellation
-                    </button>
-                    <button class="btn-cancel-back" onclick="closeCancelModal()">
-                        <i class="fas fa-times"></i>
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
+               
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script>
     $(document).ready(function () {
+        var cancelId = null;
+        var cancelType = null;
+    
         // ✅ Highlight active sidebar link
         $('.side-link').each(function () {
             if ($(this).attr('href') === window.location.pathname) {
                 $(this).addClass('active');
             }
         });
+    })
     
-        // ✅ Initialize order timeline
-        const currentStatus = "processing";  // Update this dynamically
-        updateTimeline(currentStatus);
-    });
-    
-    /**
-     * ✅ Update the order timeline based on status
-     */
-    function updateTimeline(currentStatus) {
-        const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-        const statusIndex = statuses.indexOf(currentStatus.toLowerCase());
-    
-        if (statusIndex === -1) {
-            console.error("Invalid status:", currentStatus);
-            return;
-        }
-    
-        statuses.forEach((status, index) => {
-            const element = document.getElementById(status);
-            if (element) {
-                element.classList.toggle('active', index <= statusIndex);
-                element.querySelector('.date').textContent = index <= statusIndex ? new Date().toLocaleDateString() : "";
-            }
-        });
-    
-        if (currentStatus.toLowerCase() === 'cancelled') {
-            document.querySelectorAll('.timeline-item').forEach(item => item.classList.remove('active'));
-            document.getElementById('cancelled').classList.add('active');
-        }
-    
-        const progressBar = document.querySelector('.timeline::before');
-        if (progressBar) {
-            progressBar.style.background = currentStatus !== "cancelled"
-                ? `linear-gradient(to right, #82ae46 ${(statusIndex / (statuses.length - 1)) * 100}%, #e2e8f0 0%)`
-                : "#e2e8f0";
-        }
-    }
-    
-    /**
-     * ✅ View Order Details
-     */
-    function viewOrder(orderId) {
-        const modal = document.getElementById('orderModal');
-        modal.style.display = 'block';
-    
-        fetch(`/order/details/${orderId}/`)
-            .then(response => response.json())
-            .then(data => {
-                console.log(data, "Order Data");
-    
-                document.getElementById('modalOrderId').textContent = `${data.id} (${data.created_at})`;
-                updateTimeline(data.status);
-    
-                document.getElementById('deliveryAddress').innerHTML = `
-                    <div class="address-details">
-                        <p><i class="fas fa-map-marker-alt"></i> ${data.address.street}</p>
-                        <p><i class="fas fa-city"></i> ${data.address.city}, ${data.address.state}</p>
-                        <p><i class="fas fa-location-dot"></i> ${data.address.pin_code}</p>
-                        <p><i class="fas fa-phone"></i> ${data.address.phone}</p>
-                    </div>
-                `;
-    
-                document.getElementById('paymentInfo').innerHTML = `
-                <div class="payment-details">
-                    <p><i class="fas fa-clock"></i> <strong>Order Date:</strong> ${data.created_at}</p>
-                    <p><i class="fas fa-info-circle"></i> <strong>Payment Status:</strong> 
-                        <span class="status-badge ${data.status.toLowerCase()}">${data.payment_status}</span>
-                    </p>
-                    <p><i class="fas fa-info-circle"></i> <strong>Total Price:</strong> 
-                        <span class="total-amount">₹${parseFloat(data.total_amount).toFixed(2)}</span>
-                    </p>
-                </div>
-            `;
-            
-            })
-            .catch(error => console.error('Error fetching order details:', error));
-    }
-    
-    /**
-     * ✅ Close Modal Events
-     */
-    document.querySelector('.close-modal').addEventListener('click', () => {
-        document.getElementById('orderModal').style.display = 'none';
-    });
-    
-    window.addEventListener('click', (event) => {
-        if (event.target === document.getElementById('orderModal')) {
-            document.getElementById('orderModal').style.display = 'none';
-        }
-    });
-    
-    /**
-     * ✅ Cancel Order
-     */
-    let currentOrderId = null;
-    
-    function cancelOrder(orderId) {
-        currentOrderId = orderId;
-        document.getElementById('cancelOrderId').textContent = orderId;
-        document.getElementById('cancelOrderModal').style.display = 'block';
-    
-        document.querySelectorAll('input[name="cancelReason"]').forEach(radio => radio.checked = false);
-    }
-    
-    function closeCancelModal() {
-        document.getElementById('cancelOrderModal').style.display = 'none';
-        currentOrderId = null;
-    }
-    
-    function confirmCancelOrder() {
-        const selectedReason = document.querySelector('input[name="cancelReason"]:checked');
-    
-        if (!selectedReason) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Select a Reason',
-                text: 'Please select a reason for cancellation',
-                confirmButtonColor: '#dc2626'
-            });
-            return;
-        }
-    
-        Swal.fire({
-            title: 'Confirm Cancellation',
-            text: 'Are you sure you want to cancel this order?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#718096',
-            confirmButtonText: 'Yes, cancel it!',
-            cancelButtonText: 'No, keep it'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const confirmBtn = document.querySelector('.btn-cancel-confirm');
-                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
-                confirmBtn.disabled = true;
-    
-                fetch(`/order/cancel/${currentOrderId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ reason: selectedReason.value })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.fire({
-                        icon: data.status === 'success' ? 'success' : 'error',
-                        title: data.status === 'success' ? 'Order Cancelled' : 'Error',
-                        text: data.message || 'Failed to cancel order',
-                        confirmButtonColor: '#82ae46'
-                    }).then(() => {
-                        if (data.status === 'success') window.location.reload();
-                    });
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'Failed to cancel order. Please try again.',
-                        confirmButtonColor: '#82ae46'
-                    });
-                })
-                .finally(() => {
-                    confirmBtn.innerHTML = 'Confirm';
-                    confirmBtn.disabled = false;
-                    closeCancelModal();
-                });
-            }
-        });
-    }
-    
-    /**
-     * ✅ Get CSRF Token from Cookies
-     */
-    function getCookie(name) {
-        const cookies = document.cookie.split(';').map(cookie => cookie.trim());
-        for (let cookie of cookies) {
-            if (cookie.startsWith(name + '=')) {
-                return decodeURIComponent(cookie.split('=')[1]);
-            }
-        }
-        return null;
-    }
-    
-    // ✅ Click on reason option selects the radio button
-    document.querySelectorAll('.reason-option').forEach(option => {
-        option.addEventListener('click', function () {
-            this.querySelector('input[type="radio"]').checked = true;
-        });
-    });
+       
     
 </script>
 {% endblock %}

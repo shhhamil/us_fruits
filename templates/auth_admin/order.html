@@ -639,7 +639,7 @@
             </div>
             
             <div class="table-scroll-container">
-                <table>
+                <table class="table">
                     <thead>
                         <tr>
                             <th>Order ID</th>
@@ -648,6 +648,7 @@
                             <th>Status</th>
                             <th>Payment Method</th>
                             <th>Actions</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -656,33 +657,33 @@
                             <td>{{ order.id }}</td>
                             <td>{{ order.date_of_order|date:"M d, Y" }}</td>
                             <td>₹ {{ order.total }}</td>
-
+                
                             <td>
-                                <select class="form-select order-status-dropdown" data-order-id="{{ order.id }}" 
-                                onchange="updateStatus(this)">
-                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
-                            <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
-                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
-                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-                        </select>
+                                <select class="form-select order-status-dropdown" data-order-id="{{ order.id }}" onchange="updateStatus(this)">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </td>
+                
+                            <td>{{ order.payment_method }}</td>
+                
+                            <td>
+                                <a href="{% url 'order-details' order.id %}" class="view-btn btn btn-primary btn-sm" title="View Order">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                                 
                             </td>
-                            <td>{{ order.payment_method }}</td>
-                            <td>
-                                <button class="view-btn" onclick="showOrderDetails({{ order.id }})">
-                                    View Details
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem;">
-                                No orders found
-                            </td>
-                        </tr>
-                        {% endfor %}
+                                        {% endfor %}
                     </tbody>
                 </table>
+                
+                
+                
+                
+                
+                
             </div>
             {% if orders.has_other_pages %}
             <div class="pagination">
@@ -702,80 +703,7 @@
         </div>
     </main>
 
-    <!-- Add Order Details Modal -->
-<div id="orderModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Order Details</h2>
-            <button class="modal-close" onclick="closeOrderModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="order-details">
-                <!-- Order Information -->
-                <div class="detail-section">
-                    <h3>Order Information</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Order ID:</span>
-                        <span id="modalOrderId"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Order Date:</span>
-                        <span id="modalOrderDate"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Order Status:</span>
-                        <span id="modalOrderStatus"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Payment Status:</span>
-                        <span id="modalPaymentStatus"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Payment Method:</span>
-                        <span id="modalOrderMethod"></span>   
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Total Amount:</span>
-                        <span id="modalTotalAmount"></span>
-                    </div>
-                </div>
-                
-                <!-- Shipping Address -->
-                <div class="detail-section">
-                    <h3>Shipping Address</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Street:</span>
-                        <span id="modalStreet"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">City:</span>
-                        <span id="modalCity"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">State:</span>
-                        <span id="modalState"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">PIN Code:</span>
-                        <span id="modalPinCode"></span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Phone:</span>
-                        <span id="modalPhone"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Items -->
-            <div class="detail-section mt-4">
-                <h3>Order Items</h3>
-                <div id="modalOrderItems" class="product-list">
-                    <!-- Order items will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+   
 
 
         <script>
@@ -850,87 +778,6 @@
                     }
                 });
             });
-            
-            // ✅ Global function to show order details
-            window.showOrderDetails = function (orderId) {
-                console.log('Fetching order details for ID:', orderId);
-                const modal = document.getElementById('orderModal');
-                modal.style.display = 'block';
-            
-                // Show loading indicator in modal
-                document.getElementById('modalOrderItems').innerHTML = '<div class="text-center">Loading...</div>';
-            
-                fetch(`/order/details/${orderId}/`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Received data:', data);
-            
-                    if (!document.getElementById('modalOrderId')) {
-                        console.error("Error: Modal elements not found in DOM.");
-                        return;
-                    }
-            
-                    // ✅ Update Order Details
-                    document.getElementById('modalOrderId').textContent = `#${data.id}`;
-                    document.getElementById('modalOrderDate').textContent = data.created_at;
-                    document.getElementById('modalTotalAmount').textContent = `₹${data.total_amount}`;
-                    document.getElementById('modalOrderStatus').textContent = capitalizeFirstLetter(data.status);
-                    document.getElementById('modalPaymentStatus').textContent = capitalizeFirstLetter(data.payment_status);
-                    document.getElementById('modalOrderMethod').textContent = capitalizeFirstLetter(data.payment_method);
-            
-                    // ✅ Update Shipping Address
-                    if (data.address) {
-                        document.getElementById('modalStreet').textContent = data.address.street || 'N/A';
-                        document.getElementById('modalCity').textContent = data.address.city || 'N/A';
-                        document.getElementById('modalState').textContent = data.address.state || 'N/A';
-                        document.getElementById('modalPinCode').textContent = data.address.pin_code || 'N/A';
-                        document.getElementById('modalPhone').textContent = data.address.phone || 'N/A';
-                    }
-            
-                    // ✅ Update Order Items
-                    const orderItemsContainer = document.getElementById('modalOrderItems');
-                    if (data.items && data.items.length > 0) {
-                        orderItemsContainer.innerHTML = data.items.map(item => `
-                            <div class="product-item">
-                                <img src="${item.product_image}" alt="${item.product_name}" class="product-image">
-                                <div>
-                                    <div class="detail-label">${item.product_name}</div>
-                                    <div>Quantity: ${item.quantity}</div>
-                                    <div>Price: ₹${item.price}</div>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else {
-                        orderItemsContainer.innerHTML = '<div class="text-center">No items found</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to load order details. Please try again.');
-                    closeOrderModal();
-                });
-            };
-            
-            // ✅ Global function to close modal
-            window.closeOrderModal = function () {
-                document.getElementById('orderModal').style.display = 'none';
-            };
-            
-            // ✅ Close modal when clicking outside
-            window.onclick = function (event) {
-                if (event.target == document.getElementById('orderModal')) {
-                    closeOrderModal();
-                }
-            };
             
             // ✅ Capitalize first letter function
             function capitalizeFirstLetter(str) {

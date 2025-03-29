@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.http import Http404
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count
+from user_profile.models import Complaint , Wallet
 from django.utils.dateparse import parse_datetime
 from django.contrib import messages
 from decimal import Decimal
@@ -76,9 +77,11 @@ def admin_dashbord(request):
 @never_cache
 def admin_logout(request):
     logout(request)   
+    request.session.flush() 
     return redirect('Admin_Login')
 # ______________________________________________________________________________________________________________
 # -----------------------------------------View for category management page------------------------------------
+@login_required
 def Category_Manegement(request):
     page = request.GET.get('page', 1)   
     search = request.GET.get('search', '')   
@@ -195,6 +198,7 @@ def soft_delete_category(request, category_id):
     return redirect('Category')
 # _______________________________________________________________________________________________________________
 # ----------------------------------------PRODUCT VIEWS----------------------------------------------------------
+@login_required
 def Product_Management(request):
     page = request.GET.get('page', 1)
     search = request.GET.get('search', '')
@@ -393,11 +397,7 @@ login_required
 def user_management(request):
     page = request.GET.get('page', 1)  
     search = request.GET.get('search', '').strip()
-#------------ Search users by email or username and exclude soft-deleted users--------------------------------------
-    users = CustomUser.objects.filter(
-        Q(username__icontains=search) | Q(email__icontains=search),
-        is_active=True  
-    ).order_by('id')
+    users = CustomUser.objects.filter(Q(username__icontains=search) | Q(email__icontains=search),is_active=True).order_by('id')
 
     paginator = Paginator(users, 7)  
     try:
@@ -430,10 +430,9 @@ def block_user(request, user_id):
     return redirect("User_Management")
 # ---------------------------------------------------------------------------------------------------------------------------------
 # _________________________________________Order Views______________________________________________________________________
+@login_required
 def order_management(request):
     status_filter = request.GET.get('status', 'all').strip().lower()
-
-
     orders = Order.objects.all().order_by('-date_of_order')
 
     if status_filter in dict(Order.STATUS_CHOICES): 
@@ -449,18 +448,69 @@ def order_management(request):
     except EmptyPage:
         orders_page = paginator.page(paginator.num_pages)  
 
-     
     total_orders = paginator.count  
-
     total_price = orders.aggregate(Sum('total'))['total__sum'] or 0  
+
+
+    complaints = Complaint.objects.filter(order__in=orders, order__status='delivered')
+    complaints_dict = {complaint.order.id: complaint for complaint in complaints}
+
+    for order in orders_page:
+        order.complaint = complaints_dict.get(order.id)   
 
     context = {
         'orders': orders_page,
         'current_status': status_filter,
         'total_orders': total_orders,  
-        'total_price': total_price,
+        'total_price': total_price,  
     }
     return render(request, 'auth_admin/order.html', context)
+
+# -----------------------------------------------------COMPLAINT SESSION------------------------------------------------------------------
+def admin_view_complaint(request, complaint_id):
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+    except Complaint.DoesNotExist:
+        raise Http404("Complaint not found")
+    
+    return render(request, 'auth_admin/admin_comp.html', {'complaint': complaint})
+# ---------------------------------------------------------------------------------------------------
+@login_required
+def approve_complaint(request, complaint_id):
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+        order = complaint.order
+        user = order.user
+        refund_amount = order.total  
+
+
+        complaint.status = 'approved'
+        complaint.save()
+
+        
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        wallet.balance += refund_amount
+        wallet.save()
+
+        messages.success(request, f"Refund of ₹{refund_amount} added to {user.email}'s wallet.")
+    except Complaint.DoesNotExist:
+        messages.error(request, "Complaint not found.")
+    
+    return redirect('Order_Management')
+# ----------------------------------------------------------------------------------------
+@login_required
+def reject_complaint(request, complaint_id):
+    try:
+        complaint = Complaint.objects.get(id=complaint_id)
+        complaint.status = 'rejected'
+        complaint.save()
+
+        messages.warning(request, "Complaint has been rejected.")
+    except Complaint.DoesNotExist:
+        messages.error(request, "Complaint not found.")
+    
+    return redirect('Order_Management')
+
 # __________________________________________________________________________________________________________________________________
 # ----------------------------------------------------------------------------------------------------------------------------------
 @login_required
@@ -499,40 +549,11 @@ def update_order_status(request, orderId):
 #  -----------------------------this for getting all user detials------------------------------------------------------
 def get_order_details(request, order_id):
     if request.user.is_superuser:
-        order = get_object_or_404(Order, id=order_id)  #this for Admin can access all
+        order = get_object_or_404(Order, id=order_id)
     else:
-        order = get_object_or_404(Order, id=order_id, user=request.user)  # this for Normal user can only access their own
+        order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    order_data = {
-        "id": order.id,
-        "created_at": order.date_of_order.strftime("%b %d, %Y"),
-        "status": order.status,
-        "payment_status": order.payment_status,
-        "payment_method": order.payment_method,
-        "total_amount": float(order.total),
-        "discount_amount": float(order.discount_amount or 0),
-        "address": {},
-        "items": [
-            {
-                "product_name": item.product.name,
-                "quantity": item.quantity,
-                "price": float(item.price),
-                "product_image": item.product.photo_1.url if item.product.photo_1 else "",
-            }
-            for item in order.items.all()
-        ]
-    }
-
-    if order.address:
-        order_data["address"] = {
-            "street": order.address.street,
-            "city": order.address.city,
-            "state": order.address.state,
-            "pin_code": order.address.pin_code,
-            "phone": order.address.phone,
-        }
-
-    return JsonResponse(order_data)
+    return render(request, 'auth_admin/admin_order_view.html', {'order': order})
 
 
 # --------------------------------------sales report---------------------------------------------------------------
