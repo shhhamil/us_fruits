@@ -302,6 +302,8 @@
         .order-products-table td {
             padding: 1.2rem 1.5rem;
             text-align: left;
+            background: white;
+            color:black;
             border-bottom: 1px solid var(--border-light);
         }
 
@@ -711,14 +713,19 @@
             </div>
             <div class="order-header-actions">
                 {% if order.status == 'pending' %}
-                    <button class="btn btn-cancel" onclick="openCancelOrderModal()">
-                        <i class="fas fa-times-circle"></i> 
-                    </button>
+                    <!-- Form to cancel the order directly -->
+                    <form method="POST" action="{% url 'cancel_order' order.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-cancel">
+                            <i class="fas fa-times-circle"></i> Cancel Order
+                        </button>
+                    </form>
                 {% endif %}
                 <button class="btn btn-primary" onclick="window.print()">
-                    <i class="fas fa-print"></i> 
+                    <i class="fas fa-print"></i> Print Order
                 </button>
             </div>
+            
         </div>
     
         <!-- Order Tracker Section -->
@@ -726,31 +733,30 @@
             <h3>Order Status</h3>
             <div class="progress-bar">
                 {% for status in order.STATUS_CHOICES %}
-                    <div class="tracker-step {% if status.0 in completed_statuses %}completed{% elif status.0 == order.status %}active{% endif %}">
+                    <div class="tracker-step {% if status.0 == order.status %}active{% elif status.0 in completed_statuses %}completed{% endif %}">
                         <div class="tracker-icon">
-                            {% if status.0 == 'pending' %}<i class="fas fa-shopping-cart"></i>
-                            {% elif status.0 == 'processing' %}<i class="fas fa-cog"></i>
-                            {% elif status.0 == 'shipped' %}<i class="fas fa-truck"></i>
-                            {% elif status.0 == 'delivered' %}<i class="fas fa-check-circle"></i>
-                            {% elif status.0 == 'cancelled' %}<i class="fas fa-times-circle"></i>
+                            {% if status.0 == 'pending' %}
+                                <i class="fas fa-shopping-cart"></i>
+                            {% elif status.0 == 'shipped' %}
+                                <i class="fas fa-truck"></i>
+                            {% elif status.0 == 'delivered' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif status.0 == 'Cancelled' %}
+                                <i class="fas fa-times-circle"></i>
                             {% endif %}
                         </div>
                         <span class="tracker-status">{{ status.1 }}</span>
-                        {% if not forloop.first %}
-                            
-                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
         </div>
+        
     
         <!-- Order Information Section -->
         <div class="order-details-section">
             <div class="details-grid">
                 <div class="details-card">
                     <h3><i class="fas fa-truck"></i> Delivery Information</h3>
-                    <p><i class="fas fa-user"></i> <strong>Customer:</strong> {{ order.customer.name }}</p>
-                    <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ order.customer.email }}</p>
                     <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong> {{ order.address.street }}, {{ order.address.city }}</p>
                     <p><i class="fas fa-location-dot"></i> <strong>PIN Code:</strong> {{ order.address.pin_code }}</p>
                     <p><i class="fas fa-phone"></i> <strong>Contact:</strong> {{ order.address.phone }}</p>
@@ -782,6 +788,7 @@
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Complaint Status</th>
+                    <th>Status</th>  
                     <th>Actions</th>  
                 </tr>
             </thead>
@@ -808,57 +815,56 @@
                         {% if order.status == "delivered" %}
                             {% with complaint=item.complaints.first %}
                                 {% if complaint %}
-                                    <!-- Show Complaint Status (Pending, Approved, Rejected) -->
-                                    <button 
-                                        style="
-                                            background-color: {% if complaint.status_complaint == 'pending' %}orange{% elif complaint.status_complaint == 'approved' %}green{% elif complaint.status_complaint == 'rejected' %}red{% endif %};
-                                            color: white;
-                                            border: none;
-                                            padding: 5px 10px;
-                                            border-radius: 5px;
-                                            font-size: 14px;
-                                            cursor: default;
-                                        "
-                                    >
-                                        {{ complaint.status_complaint|title }}
-                                    </button>
+                                    {% if complaint.status_complaint == 'approved' %}
+                                        <span style="color: green; font-weight: bold;">Approved</span>
+                                    {% elif complaint.status_complaint == 'rejected' %}
+                                        <span style="color: red; font-weight: bold;">Rejected</span>
+                                    {% else %}
+                                        <span style="color: orange; font-weight: bold;">Pending</span>
+                                    {% endif %}
                                 {% else %}
-                                    <!-- Show "File Complaint" Button -->
-                                    <a href="{% url 'submit_complaint' order.id item.id %}"  >
-                                        <i class="fas fa-bullhorn"></i>
+                                    <a href="{% url 'submit_complaint' order.id item.id %}">
+                                        <i class="fas fa-exclamation-triangle"></i> File Complaint
                                     </a>
                                 {% endif %}
                             {% endwith %}
                         {% else %}
-                            <!-- Show "No Complaints" Text -->
                             <span style="color: gray; font-size: 0.85rem;">No complaints</span>
                         {% endif %}
                     </td>
-                    
+        
+                    <!-- Display status of each product -->
                     <td>
                         {% if item.status == "pending" %}
-                            <!-- Cancel Button (Opens Modal) -->
-                            <button 
-                                type="button" 
-                                class="btn btn-danger btn-sm" 
-                                onclick="openCancelProductModal('{{ item.id }}', '{{ item.product.name }}')"
-                            >
-                                <i class="fas fa-times-circle"></i> 
-                            </button>
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif item.status == "shipped" %}
+                            <span class="badge badge-primary">Shipped</span>
+                        {% elif item.status == "delivered" %}
+                            <span class="badge badge-success">Delivered</span>
+                        {% elif item.status == "cancelled" %}
+                            <span class="badge badge-danger">Canceled</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Unknown</span>
+                        {% endif %}
+                    </td>
+        
+                    <td>
+                        {% if item.status == "pending" %}
+                            <!-- Cancel Item Form -->
+                            <form method="POST" action="{% url 'cancel_order_item' item.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times-circle"></i> Cancel
+                                </button>
+                            </form>
                         {% else %}
                             <span style="color: var(--text-light); font-size: 0.85rem;">No action</span>
                         {% endif %}
                     </td>
-                    
                 </tr>
                 {% endfor %}
-        
-                <!-- Order Summary Section -->
-                <tr class="summary-row">
-                    <td colspan="3" style="text-align: right; font-weight: 600;">Subtotal:</td>
-                    <td style="font-weight: 600;">₹{{ order.subtotal }}</td>
-                    <td colspan="2"></td>
-                </tr>
+                
+                <!-- Order summary -->
                 <tr class="summary-row">
                     <td colspan="3" style="text-align: right; font-weight: 600;">Shipping:</td>
                     <td style="font-weight: 600;">₹{{ order.shipping_cost }}</td>
@@ -870,79 +876,12 @@
                     <td colspan="2"></td>
                 </tr>
             </tbody>
-        </table>            
+        </table>                 
         
         
     </div>
 
-    <!-- Cancel Order Modal -->
-    <div class="modal" id="cancelOrderModal">
-        <div class="modal-content">
-            <div class="modal-header modal-danger-header">
-                <h3>Cancel Order</h3>
-                <button onclick="closeModal('cancelOrderModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to cancel this order?</p>
-                <div class="form-group">
-                    <label>Select a reason for cancellation:</label>
-                    <div class="cancel-reasons">
-                        <label class="reason-option">
-                            <input type="radio" name="cancellationReason" value="changed_mind">
-                            Changed my mind
-                        </label>
-                        <label class="reason-option">
-                            <input type="radio" name="cancellationReason" value="found_cheaper">
-                            Found cheaper elsewhere
-                        </label>
-                        <label class="reason-option">
-                            <input type="radio" name="cancellationReason" value="wrong_item">
-                            Ordered wrong item
-                        </label>
-                        <label class="reason-option">
-                            <input type="radio" name="cancellationReason" value="other">
-                            Other reason
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="orderCancelNotes">Additional Notes (optional):</label>
-                    <textarea id="orderCancelNotes" class="form-control" placeholder="Please provide any additional details..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn" onclick="closeModal('cancelOrderModal')">Close</button>
-                    <button class="btn btn-primary" onclick="confirmCancelOrder()">Confirm Cancellation</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cancel Product Modal -->
-    <div class="modal" id="cancelProductModal">
-        <div class="modal-content">
-            <div class="modal-header modal-danger-header">
-                <h3 id="cancelProductName">Cancel Product</h3>
-                <button onclick="closeModal('cancelProductModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="cancelReason">Reason for cancellation:</label>
-                    <select id="cancelReason" class="form-control">
-                        <option value="">Select a reason</option>
-                        <option value="changed_mind">Changed my mind</option>
-                        <option value="wrong_item">Ordered wrong item</option>
-                        <option value="found_better">Found a better alternative</option>
-                        <option value="no_longer_needed">No longer needed</option>
-                        <option value="other">Other reason</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn" onclick="closeModal('cancelProductModal')">Close</button>
-                    <button class="btn btn-primary" onclick="submitProductCancellation()">Submit Cancellation</button>
-                </div>
-            </div>
-        </div>
-    </div>
+   
     <script>
         // Function to get CSRF token from cookies
 function getCSRFToken() {
@@ -958,60 +897,6 @@ function getCSRFToken() {
     return cookieValue;
 }
 
-// Open cancel modal
-function openCancelProductModal(itemId, productName) {
-    const modal = document.getElementById('cancelProductModal');
-    const productNameElement = document.getElementById('cancelProductName');
-
-    if (modal && productNameElement) {
-        productNameElement.textContent = `Cancel: ${productName}`;
-        modal.style.display = 'flex';
-        modal.dataset.itemId = itemId;
-        document.getElementById('cancelReason').value = ''; // Reset selection
-    } else {
-        console.error('Modal or product name element not found.');
-    }
-}
-
-// Submit cancellation request
-function submitProductCancellation() {
-    const modal = document.getElementById('cancelProductModal');
-    const itemId = modal.dataset.itemId;
-    const reason = document.getElementById('cancelReason').value;
-
-    if (!reason) {
-        alert('Please select a cancellation reason');
-        return;
-    }
-
-    // Get CSRF token
-    const csrfToken = getCSRFToken();
-    if (!csrfToken) {
-        console.error('CSRF token not found');
-        return;
-    }
-
-    // Send request using Fetch API
-    fetch(`/cancel-order-item/${itemId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({ reason: reason })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Cancellation request submitted successfully.');
-            closeModal('cancelProductModal');
-            location.reload(); // Refresh page
-        } else {
-            alert('Failed to cancel the product. Please try again.');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
 
 
     // Complaint functions
@@ -1052,47 +937,7 @@ function submitProductCancellation() {
         closeModal('complaintModal');
     }
 
-    // Order cancellation functions
-    function openCancelOrderModal() {
-        const modal = document.getElementById("cancelOrderModal");
-        modal.style.display = "flex";
-        
-        // Reset form
-        document.querySelectorAll('input[name="cancellationReason"]').forEach(radio => {
-            radio.checked = false;
-        });
-        document.getElementById('orderCancelNotes').value = '';
-    }
-
-    function confirmCancelOrder() {
-        const selectedReason = document.querySelector('input[name="cancellationReason"]:checked');
-        const notes = document.getElementById('orderCancelNotes').value;
-        
-        if (!selectedReason) {
-            alert("Please select a cancellation reason.");
-            return;
-        }
-
-        // Here you would typically make an AJAX call to submit the cancellation
-        console.log(`Order cancellation submitted. Reason: ${selectedReason.value}`);
-        console.log(`Notes: ${notes}`);
-        
-        alert(`Your order cancellation request has been submitted. We'll process it shortly.`);
-        closeModal('cancelOrderModal');
-    }
-
-    // General modal functions
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.style.display = 'none';
-    }
-
-    // Close modals when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = 'none';
-        }
-    });
+    
     </script>
 </body>
 </html>

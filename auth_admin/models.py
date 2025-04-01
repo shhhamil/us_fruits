@@ -189,7 +189,6 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True, blank=True)  
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default=PAYMENT_UNPAID)
-    cancellation_reason = models.CharField(max_length=255, blank=True, null=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)   
 
@@ -206,6 +205,9 @@ class Order(models.Model):
         self.discount_amount = discount
         self.total = total + self.shipping_cost - discount
         self.save()
+    
+
+
 
 # ======================================Order Items =============================================================
 class OrderItem(models.Model):
@@ -219,7 +221,7 @@ class OrderItem(models.Model):
             ("pending", "Pending"),
             ("shipped", "Shipped"),
             ("delivered", "Delivered"),
-            ("canceled", "Canceled")
+            ("canceled", "Cancelled")
         ],
         default="pending",
     )
@@ -239,13 +241,7 @@ class OrderItem(models.Model):
             product_offer_price = min(product_offer_price, category_offer_price)
 
         return product_offer_price * self.quantity  
-
-    def cancel(self):
-        """Cancel this specific product in the order."""
-        if self.status != "canceled":
-            self.status = "canceled"
-            self.save()
-
+    
 # -------------------------------------------------------------------------------------------
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)  

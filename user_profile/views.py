@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect , get_object_or_404
 from django.contrib.auth import update_session_auth_hash
 from user_profile.models import Complaint
+from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from reportlab.lib import colors
 import razorpay
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from reportlab.lib.units import inch
@@ -198,7 +200,7 @@ def order_history(request):
         })
 
     total_amount = subtotal + (shipping_cost * len(orders))  
-    print(orders_data)  
+    
 
     return render(request, 'user_profile/order_history.html', {
         'orders': orders_data,
@@ -208,95 +210,31 @@ def order_history(request):
 
 
 # --------------------------------------------------------------------------------------
-@login_required
 def cancel_order(request, order_id):
-    print(f'order {order_id}')
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
-    try:
-        data = json.loads(request.body)
-        order = get_object_or_404(Order, id=order_id, user=request.user)
-        if order.status != 'pending':
-            return JsonResponse({'status': 'error', 'message': 'Only pending orders can be cancelled'}, status=400)
-
-        with transaction.atomic():
-            for item in order.items.all():
-                item.product.stock += item.quantity
-                item.product.save()
-
-            if order.payment_method == "wallet":
-                user_wallet, _ = Wallet.objects.get_or_create(user=request.user)
-                user_wallet.balance += order.total
-                user_wallet.save()
-
-                transaction_record = WalletTransaction.objects.create(
-                    wallet=user_wallet,
-                    transaction_type="credit",
-                    amount=order.total
-                )
-
-            order.status = Order.STATUS_CANCELLED
-            order.cancellation_reason = data.get('reason', 'No reason provided')
-            order.cancelled_at = timezone.now()
-            order.save()
-
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Order cancelled successfully, amount refunded to wallet' if order.payment_method == "wallet" else 'Order cancelled successfully'
-        })
-
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-# -------------------------------------------------------------------------------------------------    
-@csrf_exempt
-def cancel_order_item(request, item_id):
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            reason = data.get("reason")
+            order = Order.objects.get(id=order_id, user=request.user, status=Order.STATUS_PENDING)
+            order.status = Order.STATUS_CANCELLED
+            order.cancelled_at = timezone.now()  
+            order.save()
+            return redirect('Order-history')  
+        except Order.DoesNotExist:
+            return redirect('Error') 
+    else:
+        return HttpResponseForbidden("Invalid request method") 
+# ---------------------------------------------------------------------------------------
 
-            if not reason:
-                return JsonResponse({"success": False, "error": "No reason provided"}, status=400)
-
-            order_item = OrderItem.objects.get(id=item_id)
-
-            if order_item.status != "pending":
-                return JsonResponse({"success": False, "error": "Order cannot be cancelled"}, status=400)
-
-            user = order_item.order.user
-            wallet, _ = Wallet.objects.get_or_create(user=user)
-
-            total_refund = order_item.price * order_item.quantity
-            wallet.deposit(total_refund)
-
-            order_item.product.stock += order_item.quantity
-            order_item.product.save()
-
-            order_item.status = "cancelled"
-            order_item.cancel_reason = reason
-            order_item.save()
-
-            order = order_item.order
-            remaining_items = order.orderitem_set.filter(status="pending")
-
-            if not remaining_items.exists():
-                if hasattr(order, "shipping_cost"):
-                    shipping_cost = order.shipping_cost
-                    wallet.deposit(shipping_cost)
-                    total_refund += shipping_cost
-
-                order.status = "cancelled"
-                order.save()
-
-            return JsonResponse({"success": True, "message": f"Order cancelled. ₹{total_refund} credited to wallet, stock updated."})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+def cancel_order_item(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id)
     
-    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+    if item.status == 'pending':
+        item.status = 'cancelled'
+        item.save()
+        messages.success(request, 'Order item has been canceled successfully.')
+    else:
+        messages.error(request, 'This order item cannot be canceled.')
 
-
+    return redirect('order_detail', order_id=item.order.id)
 # -------------------------------------------------------------------------------------
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -320,10 +258,11 @@ def add_money(request, amount):
             return JsonResponse({"error": "Invalid amount"}, status=400)
 
         data = {
-            "amount": amount * 100,  
+            "amount": amount * 100,
             "currency": "INR",
-            "payment_capture": "1",
+            "payment_capture": 1,
         }
+
         order = razorpay_client.order.create(data)
 
         return JsonResponse({
@@ -332,6 +271,7 @@ def add_money(request, amount):
             "currency": "INR",
             "order_id": order["id"],
         })
+    
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 # -------------------------------------------------------------------------------

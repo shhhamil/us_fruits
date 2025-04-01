@@ -316,6 +316,16 @@ def place_order(request):
                 logger.error(" Razorpay payment ID is missing")
                 return JsonResponse({'success': False, 'message': 'Use the "Pay with Razorpay" button instead.'})
 
+        if payment_method == "wallet":
+            # Fetch the user's wallet
+            wallet = get_object_or_404(Wallet, user=request.user)
+            if wallet.balance < total_amount:
+                return JsonResponse({'success': False, 'message': 'Insufficient wallet balance.'})
+
+            # Withdraw from wallet
+            if not wallet.withdraw(total_amount):
+                return JsonResponse({'success': False, 'message': 'Wallet withdrawal failed.'})
+
         with transaction.atomic():
             address = get_object_or_404(Address, id=address_id)
 
@@ -324,7 +334,7 @@ def place_order(request):
                 address=address,
                 total=total_amount,
                 shipping_cost=shipping_cost,
-                payment_status='paid',
+                payment_status='paid' if payment_method != "wallet" else 'wallet_payment',
                 payment_method=payment_method,
                 discount_amount=discount_amount,  
                 coupon=applied_coupon
@@ -351,12 +361,14 @@ def place_order(request):
             request.session.pop("applied_coupon_code", None)
             request.session.pop("discount_amount", None)
 
-        logger.info(f"✅ Order Placed Successfully | Order ID: {order.id}")
+        logger.info(f" Order Placed Successfully | Order ID: {order.id}")
         return JsonResponse({'success': True, 'redirect_url': '/order-history/'})
 
     except Exception as e:
         logger.error(" Order processing failed", exc_info=True)
         return JsonResponse({'success': False, 'message': f'Something went wrong: {str(e)}'})
+
+
 # ---------------------------- RAZORPAY ORDER CREATION ---------------------------- #
 RAZORPAY_KEY_ID = settings.RAZORPAY_KEY_ID
 RAZORPAY_KEY_SECRET = settings.RAZORPAY_KEY_SECRET

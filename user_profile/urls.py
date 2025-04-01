@@ -12,8 +12,8 @@ urlpatterns = [
     path('set-default/<int:address_id>/', views.set_default_address, name='Set_Default_Address'),
     # -----------------------------------------------------------------------------------------------------
     path('order-history/', views.order_history, name='Order-history'),
-    path('order/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
-    path('cancel-order-item/<int:item_id>/', views.cancel_order_item, name='cancel_order_item'),
+    path('cancel_order/<int:order_id>/', views.cancel_order, name='cancel_order'),
+   path('cancel_order_item/<int:item_id>/', views.cancel_order_item, name='cancel_order_item'),
     path('orders/<int:order_id>/view/', views.order_detail, name='order_detail'),
     path('invoice/<int:order_id>/', views.generate_invoice, name='generate_invoice'),
 # --------------------------------------------------------------------------------------

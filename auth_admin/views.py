@@ -477,6 +477,7 @@ def admin_view_complaint(request, complaint_id):
 # ---------------------------------------------------------------------------------------------------
 @login_required
 def approve_complaint(request, complaint_id):
+
     try:
         complaint = Complaint.objects.get(id=complaint_id)
         order = complaint.order
@@ -484,7 +485,7 @@ def approve_complaint(request, complaint_id):
         refund_amount = order.total  
 
 
-        complaint.status = 'approved'
+        complaint.status_complaint = 'approved'
         complaint.save()
 
         
@@ -502,7 +503,7 @@ def approve_complaint(request, complaint_id):
 def reject_complaint(request, complaint_id):
     try:
         complaint = Complaint.objects.get(id=complaint_id)
-        complaint.status = 'rejected'
+        complaint.status_complaint = 'rejected'
         complaint.save()
 
         messages.warning(request, "Complaint has been rejected.")

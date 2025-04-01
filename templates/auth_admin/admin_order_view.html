@@ -402,11 +402,10 @@
                 {% for status in order.STATUS_CHOICES %}
                     <div class="admin-tracker-step {% if status.0 in completed_statuses %}completed{% elif status.0 == order.status %}active{% endif %}">
                         <div class="admin-tracker-icon">
-                            {% if status.0 == 'pending' %}<i class="fas fa-shopping-cart"></i>
-                            {% elif status.0 == 'processing' %}<i class="fas fa-cog"></i>
-                            {% elif status.0 == 'shipped' %}<i class="fas fa-truck"></i>
-                            {% elif status.0 == 'delivered' %}<i class="fas fa-check-circle"></i>
-                            {% elif status.0 == 'cancelled' %}<i class="fas fa-times-circle"></i>
+                            {% if status.pending == 'pending' %}<i class="fas fa-shopping-cart"></i>
+                            {% elif status.shipped == 'shipped' %}<i class="fas fa-truck"></i>
+                            {% elif status.delivered == 'delivered' %}<i class="fas fa-check-circle"></i>
+                            {% elif status.cancelled == 'cancelled' %}<i class="fas fa-times-circle"></i>
                             {% endif %}
                         </div>
                         <span class="admin-tracker-status">{{ status.1 }}</span>
@@ -453,7 +452,8 @@
                     <th>Product</th>
                     <th>Price</th>
                     <th>Quantity</th>
-                    <th>Complaint Status</th>
+                    <th>Complaint</th>
+                    <th>Status</th>  <!-- Added status column for each product -->
                 </tr>
             </thead>
             <tbody>
@@ -476,22 +476,62 @@
                     <td class="admin-product-price">₹{{ item.price }}</td>
                     <td class="admin-product-quantity">{{ item.quantity }}</td>
                     <td>
-                        {% if item.complaint %}
-                        <button class="admin-btn admin-btn-complaint {{ item.complaint.status }}">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>{{ item.complaint.get_status_display }}</span>
-                        </button>
+                        {% if order.status == "delivered" %}
+                            {% with complaint=item.complaints.first %}
+                                {% if complaint %}
+                                    {% if complaint.status_complaint == 'approved' %}
+                                        <span style="color: green; font-weight: bold;">Approved</span>
+                                    {% elif complaint.status_complaint == 'rejected' %}
+                                        <span style="color: red; font-weight: bold;">Rejected</span>
+                                    {% else %}
+                                        <a href="{% url 'admin_view_complaint' complaint.id %}" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <span style="color: gray; font-size: 0.85rem;">No complaints</span>
+                                {% endif %}
+                            {% endwith %}
                         {% else %}
-                        <span style="color: var(--text-light); font-size: 0.8rem;">No complaint</span>
+                            <span style="color: gray; font-size: 0.85rem;">No complaints</span>
                         {% endif %}
                     </td>
-                   
+                    
+                    
+                    
+                    <!-- Product Status Column -->
+                    <td>
+                        {% if item.status == "pending" %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif item.status == "shipped" %}
+                            <span class="badge badge-primary">Shipped</span>
+                        {% elif item.status == "delivered" %}
+                            <span class="badge badge-success">Delivered</span>
+                        {% elif item.status == "canceled" %}
+                            <span class="badge badge-danger">Canceled</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Unknown</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
+                
+                <!-- Overall Order Status -->
+                <tr style="background-color: var(--background-light);">
+                    <td colspan="4" style="text-align: right; font-weight: 600;">Order Status:</td>
+                    <td style="font-weight: 600;">
+                        {% if order.status == "canceled" %}
+                            <span style="color: red; font-weight: bold;">Order Canceled</span>
+                        {% else %}
+                            <span style="color: green; font-weight: bold;">Order Active</span>
+                        {% endif %}
+                    </td>
+                </tr>
+        
+                <!-- Order Pricing Details -->
                 <tr style="background-color: var(--background-light);">
                     <td colspan="3" style="text-align: right; font-weight: 600;">Subtotal:</td>
                     <td style="font-weight: 600;">₹{{ order.subtotal }}</td>
-                  
                 </tr>
                 <tr style="background-color: var(--background-light);">
                     <td colspan="3" style="text-align: right; font-weight: 600;">Shipping:</td>
@@ -505,6 +545,7 @@
                 </tr>
             </tbody>
         </table>
+        
         
     </div>
 </body>

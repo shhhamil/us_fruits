@@ -78,12 +78,12 @@ class Complaint(models.Model):
     created_at = models.DateTimeField(default=now)
 
     def __str__(self):
-        return f"Complaint for Order {self.order.id} - {self.status}"
+        return f"Complaint for Order {self.order.id} - {self.status_complaint}"
     
     def approve(self):
-        self.status = 'approved'
+        self.status_complaint = 'approved'
         self.save()
 
     def reject(self):
-        self.status = 'rejected'
+        self.status_complaint = 'rejected'
         self.save()
