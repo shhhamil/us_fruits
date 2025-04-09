@@ -19,7 +19,7 @@ class Address(models.Model):
 # --------------------------=-------------------------------------
 
 class Wallet(models.Model):
-    user = models.ForeignKey('auth_admin.CustomUser', on_delete=models.CASCADE)
+    user = models.OneToOneField('auth_admin.CustomUser', on_delete=models.CASCADE, related_name='wallet')
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     updated_at = models.DateTimeField(auto_now=True)
 

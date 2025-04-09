@@ -291,9 +291,10 @@
             <div class="social-login">
                 <p class="social-text">Or log in using</p>
                 <div class="social-buttons">
-                    <a href="{% provider_login_url 'google' %}" class="google-btn">
-                        <span>Continue with Google Login </span>
+                    <a href="{% provider_login_url 'google' method='oauth2' process='login' %}">
+                        <button type="button">Login with Google</button>
                     </a>
+                    
                 </div>
             </div>
         </div>

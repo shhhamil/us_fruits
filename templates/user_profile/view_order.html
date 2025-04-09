@@ -727,6 +727,22 @@
             </div>
             
         </div>
+{% if order.payment_method == 'razorpay' and order.payment_status == 'unpaid' %}
+  <div style="background-color: #fff3cd; color: #856404; padding: 12px 16px; border-radius: 6px; margin-bottom: 10px; font-weight: 500;">
+    ⚠️ Your payment is not completed. Please complete the payment to confirm your order.
+  </div>
+  <button 
+    class="btn btn-sm btn-warning mt-2 razorpay-pay-btn"
+    data-order-id="{{ order.id }}"
+    data-total="{{ order.total|floatformat:2 }}">
+    Complete Payment
+  </button>
+{% endif %}
+
+          
+          
+      
+
     
         <!-- Order Tracker Section -->
         <div class="order-tracker">
@@ -833,7 +849,6 @@
                         {% endif %}
                     </td>
         
-                    <!-- Display status of each product -->
                     <td>
                         {% if item.status == "pending" %}
                             <span class="badge badge-warning">Pending</span>
@@ -849,12 +864,11 @@
                     </td>
         
                     <td>
-                        {% if item.status == "pending" %}
-                            <!-- Cancel Item Form -->
+                        {% if item.status == "pending" and order.status != "delivered" %}
                             <form method="POST" action="{% url 'cancel_order_item' item.id %}" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-times-circle"></i> Cancel
+                                    <i class="fas fa-times-circle"></i> 
                                 </button>
                             </form>
                         {% else %}
@@ -880,9 +894,80 @@
         
         
     </div>
-
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
    
+
+
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.razorpay-pay-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const orderId = button.dataset.orderId;
+                    const total = parseFloat(button.dataset.total);
+        
+                    const response = await fetch('/create-order/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken(),
+                        },
+                        body: JSON.stringify({ cartTotal: total })
+                    });
+        
+                    const data = await response.json();
+        
+                    const options = {
+                        key: data.razorpayKeyId,
+                        amount: data.amount,
+                        currency: "INR",
+                        name: "Shamil Store",
+                        description: "Complete Order Payment",
+                        order_id: data.razorpayOrderId,
+                        handler: async function (response) {
+                            const confirm = await fetch('/complete-payment/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCSRFToken(),
+                                },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    order_id: orderId
+                                })
+                            });
+        
+                            const result = await confirm.json();
+                            if (result.success) {
+                                alert('Payment completed successfully!');
+                                location.reload();
+                            } else {
+                                alert('Payment failed: ' + result.message);
+                            }
+                        },
+                        theme: {
+                            color: "#000000"
+                        }
+                    };
+        
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                });
+            });
+        
+            function getCSRFToken() {
+                const cookieValue = document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                return cookieValue;
+            }
+        });
+  
+
+
+
+
+
+        
         // Function to get CSRF token from cookies
 function getCSRFToken() {
     let cookieValue = null;

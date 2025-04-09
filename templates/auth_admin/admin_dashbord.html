@@ -354,12 +354,22 @@
                 </div>
             </div>
         </header>
-        <section class="content-main">
-            {% csrf_token %}
-            <div class="content-header">
-                <h2 class="content-title">Dashboard</h2>               
-            </div>
-        </section>
+
+
+<h2 class="text-xl font-bold mb-4">Sales Chart</h2>
+
+<div class="flex gap-2 mb-4">
+  <button onclick="updateChart('daily')" class="bg-blue-500 text-white px-4 py-1 rounded">Daily</button>
+  <button onclick="updateChart('weekly')" class="bg-blue-500 text-white px-4 py-1 rounded">Weekly</button>
+  <button onclick="updateChart('monthly')" class="bg-blue-500 text-white px-4 py-1 rounded">Monthly</button>
+  <button onclick="updateChart('yearly')" class="bg-blue-500 text-white px-4 py-1 rounded">Yearly</button>
+</div>
+
+<canvas id="salesChart" width="400" height="200"></canvas>
+
+
+       
+        
 
         <div class="dashboard-container">
             <h2>Most Popular Products</h2>
@@ -404,6 +414,61 @@
         </div>
     </main>
 
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const chartData = {
+            daily: {
+                labels: {{ daily.labels|safe }},
+                data: {{ daily.data|safe }},
+            },
+            weekly: {
+                labels: {{ weekly.labels|safe }},
+                data: {{ weekly.data|safe }},
+            },
+            monthly: {
+                labels: {{ monthly.labels|safe }},
+                data: {{ monthly.data|safe }},
+            },
+            yearly: {
+                labels: {{ yearly.labels|safe }},
+                data: {{ yearly.data|safe }},
+            },
+        };
+    
+        const ctx = document.getElementById('salesChart').getContext('2d');
+    
+        // Default: Daily
+        let salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.daily.labels,
+                datasets: [{
+                    label: 'Sales (₹)',
+                    data: chartData.daily.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 100 }  // Optional: customize
+                    }
+                }
+            }
+        });
+    
+        function updateChart(range) {
+            salesChart.data.labels = chartData[range].labels;
+            salesChart.data.datasets[0].data = chartData[range].data;
+            salesChart.update();
+        }
+    </script>
     <script>
         // Sidebar Toggle
         document.querySelector('.toggle-btn').addEventListener('click', function () {
@@ -427,5 +492,7 @@
             }
         });
     </script>
+
+    
 </body>
 </html>

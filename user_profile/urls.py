@@ -22,6 +22,8 @@ urlpatterns = [
     path("payment-success/", views.payment_success, name="payment_success"),
     # --------------------------------------------------------------------------------
     path("complaints/submit/<int:order_id>/<int:item_id>/", views.submit_complaint, name="submit_complaint"),
+    path('complete-payment/', views.complete_payment, name='complete_payment'),
+
 
     
 

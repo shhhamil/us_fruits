@@ -557,7 +557,7 @@
                 <h2 class="content-title">Product Management</h2>
                 <div style="float: right;">
                     <div style="float: right;">
-                         <a href="{% url "Add_Product"%}"><button type="button" class="btn" onclick="openModal('add')" style="background-color: black; color: white; border-radius: 2px; padding: 8px 15px; margin-right: 10px;" id="addCategoryBtn"> Add Products</button></a> 
+                         <a href="{% url "Add_Product" %}"><button type="button" class="btn" onclick="openModal('add')" style="background-color: black; color: white; border-radius: 2px; padding: 8px 15px; margin-right: 10px;" id="addCategoryBtn"> Add Products</button></a> 
                     </div>
                 </div>
                 <div style="clear: both;"></div>
@@ -588,7 +588,7 @@
                         </td> 
                         <td>{{ product.name }}</td>
                         <td>{{ product.category }}</td>
-                        <td><del>₹{{ product.price }}</del></td>  <!-- Strikethrough original price -->
+                        <td><del>₹{{ product.price }}</del></td>  
                         <td>{{ product.offer_percentage }}%</td> 
                         <td><strong style="color: green;">₹{{ product.offer_price }}</strong></td>  
                         <td>{{ product.stock }}</td>

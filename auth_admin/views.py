@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
 from django.http import Http404
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count
+from django.utils.timezone import now
 from user_profile.models import Complaint , Wallet
 from django.utils.dateparse import parse_datetime
 from django.contrib import messages
@@ -65,13 +67,68 @@ def admin_dashbord(request):
     popular_products = Product.objects.annotate(order_count=Count('orderitem')).order_by('-order_count')[:5]
     popular_categories = Category.objects.annotate(order_count=Count('products__orderitem')).order_by('-order_count')[:5]
     
+    sales = get_sales_data()
 
-    
     context = {
         'popular_products': popular_products,
         'popular_categories': popular_categories,
+        'daily': sales['daily'],
+        'weekly': sales['weekly'],
+        'monthly': sales['monthly'],
+        'yearly': sales['yearly'],
     }
     return render(request, 'auth_admin/admin_dashbord.html', context)
+
+
+def get_sales_data():
+    today = now()
+
+    daily = (Order.objects
+             .filter(date_of_order__gte=today - timedelta(days=6))
+             .annotate(day=TruncDay('date_of_order'))
+             .values('day')
+             .annotate(total=Sum('total'))
+             .order_by('day'))
+
+    daily_labels = [item['day'].strftime('%b %d') for item in daily]
+    daily_data = [float(item['total']) for item in daily]
+
+    weekly = (Order.objects
+              .filter(date_of_order__gte=today - timedelta(weeks=4))
+              .annotate(week=TruncWeek('date_of_order'))
+              .values('week')
+              .annotate(total=Sum('total'))
+              .order_by('week'))
+
+    weekly_labels = [item['week'].strftime('Week %W') for item in weekly]
+    weekly_data = [float(item['total']) for item in weekly]
+
+    monthly = (Order.objects
+               .filter(date_of_order__gte=today - timedelta(days=180))
+               .annotate(month=TruncMonth('date_of_order'))
+               .values('month')
+               .annotate(total=Sum('total'))
+               .order_by('month'))
+
+    monthly_labels = [item['month'].strftime('%b %Y') for item in monthly]
+    monthly_data = [float(item['total']) for item in monthly]
+
+    yearly = (Order.objects
+              .filter(date_of_order__year__gte=today.year - 4)
+              .annotate(year=TruncYear('date_of_order'))
+              .values('year')
+              .annotate(total=Sum('total'))
+              .order_by('year'))
+
+    yearly_labels = [item['year'].strftime('%Y') for item in yearly]
+    yearly_data = [float(item['total']) for item in yearly]
+
+    return {
+        'daily': {'labels': daily_labels, 'data': daily_data},
+        'weekly': {'labels': weekly_labels, 'data': weekly_data},
+        'monthly': {'labels': monthly_labels, 'data': monthly_data},
+        'yearly': {'labels': yearly_labels, 'data': yearly_data},
+    }
 # ______________________________________________________________________________________________________________
 # ---------------------------------------LOGOUT VIEWS-----------------------------------------------------------
 @never_cache
@@ -203,7 +260,7 @@ def Product_Management(request):
     page = request.GET.get('page', 1)
     search = request.GET.get('search', '')
     
-    products = Product.objects.filter(is_active=True).order_by('name')
+    products = Product.objects.all()
     if search:
         products = products.filter(name__icontains=search)
     
@@ -241,29 +298,29 @@ def add_product(request):
             offer_percentage = Decimal(offer_percentage)   
         except ValueError:
             messages.error(request, "Invalid price, stock, or discount value!")
-            return redirect('add_product')
+            return redirect('Add_Product')
 
         if not name:
             messages.error(request, "Product name is required!")
-            return redirect('add_product')
+            return redirect('Add_Product')
         if not description:
             messages.error(request, "Description is required!")
-            return redirect('add_product')
+            return redirect('Add_Product')
         if not category_id:
             messages.error(request, "Category is required!")
-            return redirect('add_product')
+            return redirect('Add_Product')
         if price < 0:
             messages.error(request, "Price cannot be negative!")
-            return redirect('add_product')
+            return redirect('Add_Product')
         if not (0 <= offer_percentage <= 100):
             messages.error(request, "Offer percentage must be between 0 and 100!")
-            return redirect('add_product')
+            return redirect('Add_Product')
         if stock < 0:
             messages.error(request, "Stock cannot be negative!")
-            return redirect('add_product')
+            return redirect('Add_Productt')
         if not photo_1:
             messages.error(request, "At least one photo is required!")
-            return redirect('add_product')
+            return redirect('Add_Product')
 
         category = get_object_or_404(Category, id=category_id)
 
@@ -288,7 +345,7 @@ def add_product(request):
             return redirect('Product')
         except Exception as e:
             messages.error(request, f"Error creating product: {str(e)}")
-            return redirect('add_product')
+            return redirect('Add_Product')
 
     categories = Category.objects.all()
     return render(request, 'auth_admin/add_pro.html', {'categories': categories})
@@ -397,7 +454,7 @@ login_required
 def user_management(request):
     page = request.GET.get('page', 1)  
     search = request.GET.get('search', '').strip()
-    users = CustomUser.objects.filter(Q(username__icontains=search) | Q(email__icontains=search),is_active=True).order_by('id')
+    users = CustomUser.objects.filter(Q(username__icontains=search) | Q(email__icontains=search)).order_by('id')
 
     paginator = Paginator(users, 7)  
     try:
@@ -555,7 +612,6 @@ def get_order_details(request, order_id):
         order = get_object_or_404(Order, id=order_id, user=request.user)
 
     return render(request, 'auth_admin/admin_order_view.html', {'order': order})
-
 
 # --------------------------------------sales report---------------------------------------------------------------
 @login_required
@@ -808,3 +864,5 @@ def delete_coupon(request, coupon_id):
     coupon = Coupon.objects.get(id=coupon_id)
     coupon.toggle_delete()
     return redirect("coupon_list")
+
+# -------------------------------------------------

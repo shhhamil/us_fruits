@@ -516,23 +516,7 @@
                 </tr>
                 {% endfor %}
                 
-                <!-- Overall Order Status -->
-                <tr style="background-color: var(--background-light);">
-                    <td colspan="4" style="text-align: right; font-weight: 600;">Order Status:</td>
-                    <td style="font-weight: 600;">
-                        {% if order.status == "canceled" %}
-                            <span style="color: red; font-weight: bold;">Order Canceled</span>
-                        {% else %}
-                            <span style="color: green; font-weight: bold;">Order Active</span>
-                        {% endif %}
-                    </td>
-                </tr>
-        
-                <!-- Order Pricing Details -->
-                <tr style="background-color: var(--background-light);">
-                    <td colspan="3" style="text-align: right; font-weight: 600;">Subtotal:</td>
-                    <td style="font-weight: 600;">₹{{ order.subtotal }}</td>
-                </tr>
+                            
                 <tr style="background-color: var(--background-light);">
                     <td colspan="3" style="text-align: right; font-weight: 600;">Shipping:</td>
                     <td style="font-weight: 600;">₹{{ order.shipping_cost }}</td>

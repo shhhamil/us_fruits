@@ -284,8 +284,6 @@ def place_order(request):
         payment_method = data.get('payment_method')
         razorpay_payment_id = data.get("razorpay_payment_id")
 
-        logger.info(f"🛒 Placing Order | Address: {address_id}, Payment: {payment_method}, Razorpay ID: {razorpay_payment_id}")
-
         cart = get_object_or_404(Cart, user=request.user)
         cart_items = CartItem.objects.filter(cart=cart)
         if not cart_items.exists():
@@ -311,20 +309,17 @@ def place_order(request):
         if payment_method == "cod" and total_amount >= 1000:
             return JsonResponse({'success': False, 'message': 'COD is not available for orders above ₹1000.'})
 
-        if payment_method == "razorpay":
-            if not razorpay_payment_id:
-                logger.error(" Razorpay payment ID is missing")
-                return JsonResponse({'success': False, 'message': 'Use the "Pay with Razorpay" button instead.'})
-
         if payment_method == "wallet":
-            # Fetch the user's wallet
             wallet = get_object_or_404(Wallet, user=request.user)
             if wallet.balance < total_amount:
                 return JsonResponse({'success': False, 'message': 'Insufficient wallet balance.'})
-
-            # Withdraw from wallet
             if not wallet.withdraw(total_amount):
                 return JsonResponse({'success': False, 'message': 'Wallet withdrawal failed.'})
+
+        if payment_method == "razorpay":
+            payment_status = 'paid' if razorpay_payment_id else 'unpaid'
+        else:
+            payment_status = 'paid'
 
         with transaction.atomic():
             address = get_object_or_404(Address, id=address_id)
@@ -334,14 +329,15 @@ def place_order(request):
                 address=address,
                 total=total_amount,
                 shipping_cost=shipping_cost,
-                payment_status='paid' if payment_method != "wallet" else 'wallet_payment',
+                payment_status=payment_status,
                 payment_method=payment_method,
-                discount_amount=discount_amount,  
+                discount_amount=discount_amount,
                 coupon=applied_coupon
             )
 
-            order.razorpay_payment_id = razorpay_payment_id
-            order.save()
+            if razorpay_payment_id:
+                order.razorpay_payment_id = razorpay_payment_id
+                order.save()
 
             for item in cart_items:
                 product = item.product
@@ -352,7 +348,7 @@ def place_order(request):
                     order=order,
                     product=product,
                     quantity=item.quantity,
-                    price=product.offer_price  
+                    price=product.offer_price
                 )
                 product.stock -= item.quantity
                 product.save()
@@ -361,13 +357,10 @@ def place_order(request):
             request.session.pop("applied_coupon_code", None)
             request.session.pop("discount_amount", None)
 
-        logger.info(f" Order Placed Successfully | Order ID: {order.id}")
-        return JsonResponse({'success': True, 'redirect_url': '/order-history/'})
+        return JsonResponse({'success': True, 'redirect_url': '/order-history/', 'order_id': order.id})
 
     except Exception as e:
-        logger.error(" Order processing failed", exc_info=True)
         return JsonResponse({'success': False, 'message': f'Something went wrong: {str(e)}'})
-
 
 # ---------------------------- RAZORPAY ORDER CREATION ---------------------------- #
 RAZORPAY_KEY_ID = settings.RAZORPAY_KEY_ID

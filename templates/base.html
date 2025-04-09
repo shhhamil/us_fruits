@@ -460,7 +460,7 @@
     
     {% block content %}
     {% endblock %}
-
+    {% block footer %}
     <!-- Footer -->
     <footer class="ftco-footer ftco-section">
       <div class="container">
@@ -535,6 +535,7 @@
         </div>
       </div>
     </footer>
+    {% endblock %}
     <!-- JavaScript -->
 
  
@@ -625,6 +626,7 @@
         });
         
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'userr/js/jquery.min.js' %}"></script>
     <script src="{% static 'userr/js/jquery-migrate-3.0.1.min.js' %}"></script>
      <script src="{% static 'userr/js/bootstrap.min.js' %}"></script>

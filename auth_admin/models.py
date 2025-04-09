@@ -3,6 +3,7 @@ from django.utils import timezone
 from PIL import Image
 from django.utils.timezone import now
 from io import BytesIO
+from decimal import Decimal
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -17,7 +18,7 @@ class CustomUser(AbstractUser):
     is_staff = models.BooleanField(default=False)  
     email = models.EmailField(unique=True)  
     deleted_at = models.DateTimeField(null=True, blank=True)  
-
+    
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = self.email
@@ -47,6 +48,8 @@ class Category(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def delete(self):
@@ -160,68 +163,64 @@ class Order(models.Model):
     STATUS_DELIVERED = 'delivered'
 
     STATUS_CHOICES = [
-        (STATUS_PENDING, _('Pending')),
-        (STATUS_SHIPPED, _('Shipped')),
-        (STATUS_CANCELLED, _('Cancelled')),
-        (STATUS_DELIVERED, _('Delivered')),
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_SHIPPED, 'Shipped'),
+        (STATUS_CANCELLED, 'Cancelled'),
+        (STATUS_DELIVERED, 'Delivered'),
     ]
 
     PAYMENT_PAID = 'paid'
     PAYMENT_UNPAID = 'unpaid'
 
     PAYMENT_CHOICES = [
-        (PAYMENT_PAID, _('Paid')),
-        (PAYMENT_UNPAID, _('Unpaid')),
+        (PAYMENT_PAID, 'Paid'),
+        (PAYMENT_UNPAID, 'Unpaid'),
     ]
 
     PAYMENT_METHOD_CHOICES = [
-        ('cod', _('Cash on Delivery')),
-        ('razorpay', _('Razorpay')),
-        ('wallet', _('Wallet')),
+        ('cod', 'Cash on Delivery'),
+        ('razorpay', 'Razorpay'),
+        ('wallet', 'Wallet'),
     ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="orders")
     date_of_order = models.DateTimeField(auto_now_add=True)
-    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True) 
+    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  
-    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=30.00)   
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True, blank=True)  
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=30.00)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default=PAYMENT_UNPAID)
     cancelled_at = models.DateTimeField(null=True, blank=True)
-    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)   
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Order {self.id} - {self.user.email} ({self.status}) - ({self.payment_status}) - ({self.payment_method})"
 
     def calculate_total(self):
         total = sum(item.get_total_offer_price for item in self.items.all())
-
         discount = 0
-        if self.coupon and self.coupon.is_deleted and self.coupon.start_date <= now() <= self.coupon.end_date:
+        if self.coupon and not self.coupon.is_deleted and self.coupon.start_date <= now() <= self.coupon.end_date:
             discount = (total * self.coupon.discount) / 100 if self.coupon.discount else 0
-
         self.discount_amount = discount
         self.total = total + self.shipping_cost - discount
         self.save()
-    
 
+# ======================================================================================================================
 
-
-# ======================================Order Items =============================================================
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")   
-    product = models.ForeignKey('Product', on_delete=models.PROTECT)    
-    quantity = models.PositiveIntegerField(default=1)     
-    price = models.DecimalField(max_digits=10, decimal_places=2)  
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey('Product', on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=20,
         choices=[
             ("pending", "Pending"),
             ("shipped", "Shipped"),
             ("delivered", "Delivered"),
-            ("canceled", "Cancelled")
+            ("cancelled", "Cancelled")
         ],
         default="pending",
     )
@@ -231,16 +230,15 @@ class OrderItem(models.Model):
 
     @property
     def get_total_offer_price(self):
-        product_offer_price = self.product.price   
-
-        if self.product.offer_price:
-            product_offer_price = self.product.offer_price
-
+        product_offer_price = self.product.offer_price or self.product.price
         if self.product.category and self.product.category.offer_price:
             category_offer_price = self.product.category.offer_price
             product_offer_price = min(product_offer_price, category_offer_price)
+        return product_offer_price * self.quantity
 
-        return product_offer_price * self.quantity  
+    def get_refund_amount(self):
+        return self.get_total_offer_price
+
     
 # -------------------------------------------------------------------------------------------
 class Coupon(models.Model):

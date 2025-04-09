@@ -134,8 +134,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-RAZORPAY_KEY_ID = os.getenv("KEY_ID")
-RAZORPAY_KEY_SECRET = os.getenv("KEY_SECRET")
+RAZORPAY_KEY_ID = os.getenv("KEY_ID", "").strip()
+RAZORPAY_KEY_SECRET = os.getenv("KEY_SECRET", "").strip()
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -170,7 +171,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/login/' 
+LOGIN_URL = '/my_login/' 
 LOGIN_REDIRECT_URL = '/home/'
 
 AUTH_USER_MODEL = 'auth_admin.CustomUser'

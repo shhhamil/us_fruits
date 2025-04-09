@@ -10,9 +10,10 @@ from django.db.models.functions import Greatest
 from django.core.paginator import Paginator
 # ----------------------------------------------------------------------------------------------
 def shop(request):
-    products = Product.objects.filter(is_active=True).select_related('category')
-    
-    products = Product.objects.filter(is_active=True).select_related('category').annotate(
+    products = Product.objects.filter(
+        is_active=True,
+        category__is_active=True
+    ).select_related('category').annotate(
         max_discount=Greatest(
             F('offer_percentage'), 
             F('category__discount_percentage'), 
@@ -32,7 +33,9 @@ def shop(request):
     except (ValueError, TypeError):
         min_price, max_price = 0, 10000
 
-    max_db_price = Product.objects.filter(is_active=True).aggregate(Max('offer_price'))['offer_price__max'] or 10000
+    max_db_price = Product.objects.filter(
+        is_active=True, category__is_active=True
+    ).aggregate(Max('offer_price'))['offer_price__max'] or 10000
     max_price = min(max_price, max_db_price)
 
     if category.isdigit():
