@@ -300,7 +300,7 @@ def place_order(request):
             try:
                 applied_coupon = Coupon.objects.get(code=applied_coupon_code, is_deleted=False)
                 if not (applied_coupon.start_date <= timezone.now() <= applied_coupon.end_date):
-                    applied_coupon = None   
+                    applied_coupon = None
             except Coupon.DoesNotExist:
                 applied_coupon = None
 
@@ -318,8 +318,12 @@ def place_order(request):
 
         if payment_method == "razorpay":
             payment_status = 'paid' if razorpay_payment_id else 'unpaid'
-        else:
+        elif payment_method == "cod":
+            payment_status = 'unpaid'
+        elif payment_method == "wallet":
             payment_status = 'paid'
+        else:
+            payment_status = 'unpaid'
 
         with transaction.atomic():
             address = get_object_or_404(Address, id=address_id)
@@ -455,12 +459,14 @@ def apply_coupon(request):
         try:
             data = json.loads(request.body)
             coupon_id = data.get("coupon_id")
-            print(coupon_id)
 
             if not coupon_id:
                 return JsonResponse({"success": False, "message": "No coupon selected."}, status=400)
 
-            coupon = get_object_or_404(Coupon, id=coupon_id, is_deleted=False)
+            try:
+                coupon = Coupon.objects.get(id=coupon_id, is_deleted=False)
+            except Coupon.DoesNotExist:
+                return JsonResponse({"success": False, "message": "Coupon not found."}, status=400)
 
             if coupon.usage_limit <= 0:
                 return JsonResponse({"success": False, "message": "Coupon usage limit reached."}, status=400)
@@ -504,20 +510,17 @@ def apply_coupon(request):
 
             return JsonResponse({
                 "success": True,
-                "discount_amount": discount_amount,
-                "total_amount": total_amount,
+                "discount_amount": float(discount_amount),
+                "total_amount": float(total_amount),
                 "remaining_usage": coupon.usage_limit
             })
 
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Invalid request format."}, status=400)
-        except Coupon.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Coupon not found."}, status=400)
-        except Exception as e:  
+        except Exception:
             return JsonResponse({"success": False, "message": "Something went wrong. Please try again."}, status=500)
 
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
-
 
 
 

@@ -497,9 +497,6 @@
                         {% endif %}
                     </td>
                     
-                    
-                    
-                    <!-- Product Status Column -->
                     <td>
                         {% if item.status == "pending" %}
                             <span class="badge badge-warning">Pending</span>
@@ -507,7 +504,7 @@
                             <span class="badge badge-primary">Shipped</span>
                         {% elif item.status == "delivered" %}
                             <span class="badge badge-success">Delivered</span>
-                        {% elif item.status == "canceled" %}
+                        {% elif item.status == "cancelled" %}
                             <span class="badge badge-danger">Canceled</span>
                         {% else %}
                             <span class="badge badge-secondary">Unknown</span>

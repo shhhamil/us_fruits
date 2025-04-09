@@ -950,7 +950,7 @@
                     if (data.success) {
                         document.getElementById("coupon-message").innerText = "Coupon applied successfully!";
                         document.getElementById("discount-row").style.display = "flex";
-                        document.getElementById("discount-amount").textContent = `-₹${(data.discount_amount || 0).toFixed(2)}`;
+                        document.getElementById("discount-amount").textContent = `-₹${(Number(data.discount_amount) || 0).toFixed(2)}`;
                         document.getElementById("total-price").textContent = `₹${(data.total_amount || 0).toFixed(2)}`;
                     } else {
                         document.getElementById("coupon-message").innerText = data.message;
