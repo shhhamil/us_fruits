@@ -451,6 +451,36 @@
         }
     }
 </style>
+<style>
+    .notification {
+        background: #333;
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.4s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .notification.success {
+        background-color: #28a745;
+    }
+    .notification.error {
+        background-color: #dc3545;
+    }
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    .notification-icon {
+        font-size: 18px;
+    }
+    </style>
+    
 {% endblock %}
 
 {% block content %}
@@ -496,6 +526,8 @@
             </div>
         </div>
     </div>
+    <div class="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
 
     <!-- Main Content -->
     <div class="main-content">
@@ -608,68 +640,27 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var addMoneyBtn = document.querySelector(".submit-btn");
-        if (addMoneyBtn) {
-            addMoneyBtn.addEventListener("click", addMoney);
-        }
-    });
+    // ✅ Custom Toast Notification
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle notification-icon"></i>
+            <span class="notification-message">${message}</span>
+        `;
     
-    function addMoney() {
-        var amount = document.getElementById("amountInput").value;
+        const container = document.querySelector('.notification-container');
+        container.appendChild(notification);
     
-        if (!amount || isNaN(amount) || amount <= 0) {
-            alert("Please enter a valid amount!");
-            return;
-        }
+        setTimeout(() => notification.classList.add('show'), 10);
     
-        fetch(`/add-money/${amount}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
-    
-            var options = {
-                "key": data.key,
-                "amount": data.amount,  // Razorpay amount in paisa
-                "currency": "INR",
-                "order_id": data.order_id,
-                "name": "Your Website",
-                "description": "Wallet Top-up",
-                "handler": function (response) {
-                    fetch("/payment-success/", {
-                        method: "POST",
-                        body: JSON.stringify({
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            amount: data.amount  // Sending amount in paisa
-                        }),
-                        headers: { 
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCSRFToken()  // CSRF Token Handling
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.error) {
-                            alert("Error: " + res.error);
-                        } else {
-                            alert(res.message);
-                            location.reload(); // Refresh page after successful wallet update
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-                }
-            };
-    
-            var rzp1 = new Razorpay(options);
-            rzp1.open();
-        })
-        .catch(error => console.error("Error:", error));
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 200);
+        }, 2000);
     }
     
-    // ✅ Function to Get CSRF Token from Cookies
+    // ✅ CSRF Token Fetcher
     function getCSRFToken() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -677,16 +668,83 @@
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.startsWith("csrftoken=")) {
-                    cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+                    cookieValue = cookie.substring("csrftoken=".length);
                     break;
                 }
             }
         }
         return cookieValue;
     }
+    
+    // ✅ Wallet Add Money Function
+    function addMoney() {
+        const amount = document.getElementById("amountInput").value;
+    
+        if (!amount || isNaN(amount) || amount <= 0) {
+            showNotification("Please enter a valid amount!", "error");
+            return;
+        }
+    
+        fetch(`/add-money/${amount}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showNotification(data.error, "error");
+                    return;
+                }
+    
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    order_id: data.order_id,
+                    name: "Your Website",
+                    description: "Wallet Top-up",
+                    handler: function (response) {
+                        fetch("/payment-success/", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                amount: data.amount
+                            }),
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": getCSRFToken()
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(res => {
+                                if (res.error) {
+                                    showNotification("Error: " + res.error, "error");
+                                } else {
+                                    showNotification(res.message, "success");
+                                    setTimeout(() => location.reload(), 1500);
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error:", error);
+                                showNotification("An unexpected error occurred.", "error");
+                            });
+                    }
+                };
+    
+                const rzp1 = new Razorpay(options);
+                rzp1.open();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showNotification("Something went wrong. Please try again.", "error");
+            });
+    }
+    
+    // ✅ Attach Event on DOM Ready
+    document.addEventListener("DOMContentLoaded", function () {
+        const addMoneyBtn = document.querySelector(".submit-btn");
+        if (addMoneyBtn) {
+            addMoneyBtn.addEventListener("click", addMoney);
+        }
+    });
     </script>
     
-
-
 
 {% endblock %}

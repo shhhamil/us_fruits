@@ -79,7 +79,7 @@ def admin_dashbord(request):
     }
     return render(request, 'auth_admin/admin_dashbord.html', context)
 
-
+# ----------------------------------------------------------------------------------------------
 def get_sales_data():
     today = now()
 

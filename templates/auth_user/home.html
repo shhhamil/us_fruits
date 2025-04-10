@@ -695,6 +695,237 @@
       }
   
     </style>
+    <style>
+        /* Modern Categories Section Styles - Fully Responsive */
+        .categories {
+          padding: 3rem 0;
+          background-color: #f9f9f9;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        
+        .container {
+          width: 100%;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 15px;
+          box-sizing: border-box;
+        }
+        
+        .section-title {
+          text-align: center;
+          margin-bottom: 2rem;
+          font-size: 2rem;
+          font-weight: 700;
+          position: relative;
+          color: #333;
+          padding-bottom: 0.75rem;
+        }
+        
+        .section-title span {
+          position: relative;
+          z-index: 1;
+        }
+        
+        .section-title span:after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          bottom: -10px;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 4px;
+          background: linear-gradient(90deg, #4ade80, #22c55e);
+          border-radius: 2px;
+        }
+        
+        .category-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+        
+        .category-card {
+          background-color: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          width: 100%;
+        }
+        
+        .category-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-image-container {
+          position: relative;
+          overflow: hidden;
+          height: 180px;
+        }
+        
+        .card-image-container img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease;
+        }
+        
+        .category-card:hover .card-image-container img {
+          transform: scale(1.05);
+        }
+        
+        .image-overlay {
+          position: absolute;
+          inset: 0;
+          background-color: rgba(0, 0, 0, 0.15);
+          transition: background-color 0.3s ease;
+        }
+        
+        .category-card:hover .image-overlay {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-content {
+          padding: 1.25rem;
+        }
+        
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          color: #1f2937;
+        }
+        
+        .card-description {
+          color: #6b7280;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          margin-bottom: 1rem;
+        }
+        
+        .shop-now-btn {
+          display: inline-flex;
+          align-items: center;
+          color: #16a34a;
+          font-weight: 500;
+          text-decoration: none;
+          transition: color 0.2s ease;
+          font-size: 0.9rem;
+        }
+        
+        .shop-now-btn:hover {
+          color: #166534;
+        }
+        
+        .arrow-icon {
+          margin-left: 0.3rem;
+          font-style: normal;
+          transition: transform 0.2s ease;
+        }
+        
+        .shop-now-btn:hover .arrow-icon {
+          transform: translateX(4px);
+        }
+        
+        /* Small devices (phones, 576px and up) */
+        @media (min-width: 576px) {
+          .categories {
+            padding: 3.5rem 0;
+          }
+          
+          .card-image-container {
+            height: 200px;
+          }
+          
+          .card-content {
+            padding: 1.5rem;
+          }
+          
+          .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+          }
+          
+          .card-description {
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+          }
+        }
+        
+        /* Medium devices (tablets, 768px and up) */
+        @media (min-width: 768px) {
+          .categories {
+            padding: 4rem 0;
+          }
+          
+          .section-title {
+            font-size: 2.25rem;
+            margin-bottom: 2.5rem;
+          }
+          
+          .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.75rem;
+          }
+        }
+        
+        /* Large devices (desktops, 992px and up) */
+        @media (min-width: 992px) {
+          .categories {
+            padding: 5rem 0;
+          }
+          
+          .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+          }
+          
+          .category-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+          }
+          
+          .card-image-container {
+            height: 220px;
+          }
+          
+          .card-title {
+            font-size: 1.35rem;
+          }
+          
+          .card-description {
+            font-size: 1rem;
+          }
+        }
+        
+        /* Extra large devices (large desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+          .container {
+            padding: 0 2rem;
+          }
+          
+          .category-grid {
+            gap: 2.5rem;
+          }
+          
+          .card-image-container {
+            height: 240px;
+          }
+        }
+        
+        /* Touch device optimization */
+        @media (hover: none) {
+          .category-card:hover {
+            transform: none;
+          }
+          
+          .category-card:active {
+            transform: scale(0.98);
+          }
+        }
+        </style>
     {% endblock %}
   </head>
   <body class="goto-here">
@@ -714,7 +945,64 @@
       <p class="hero-subtitle">Fresh & Organic Fruits Delivered to Your Door</p>
     </div>
   </section>
-   1
+
+  <section class="categories">
+    <div class="container">
+      <h2 class="section-title">
+        <span>Shop by Category</span>
+      </h2>
+      
+      <div class="category-grid">
+        <!-- Apple Category Card -->
+        <div class="category-card">
+          <div class="card-image-container">
+            <img src="{% static 'userr/images/apple.jpg' %}" alt="Fresh Apples">
+            <div class="image-overlay"></div>
+          </div>
+          <div class="card-content">
+            <h5 class="card-title">Fresh Apples</h5>
+            <p class="card-description">Crisp and juicy, perfect for everyday snacking</p>
+            <a href="{% url 'Shop' %}" class="shop-now-btn">
+              Shop Now <i class="arrow-icon">→</i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Banana Category Card -->
+        <div class="category-card">
+          <div class="card-image-container">
+            <img src="{% static 'userr/images/banana.jpg' %}" alt="Organic Bananas">
+            <div class="image-overlay"></div>
+          </div>
+          <div class="card-content">
+            <h5 class="card-title">Organic Bananas</h5>
+            <p class="card-description">Farm-fresh, ethically sourced, and certified organic</p>
+            <a href="{% url 'Shop' %}" class="shop-now-btn">
+              Shop Now <i class="arrow-icon">→</i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Grapes Category Card -->
+        <div class="category-card">
+          <div class="card-image-container">
+            <img src="{% static 'userr/images/grapes.jpg' %}" alt="Juicy Grapes">
+            <div class="image-overlay"></div>
+          </div>
+          <div class="card-content">
+            <h5 class="card-title">Juicy Grapes</h5>
+            <p class="card-description">Sweet, seedless varieties perfect for snacking</p>
+            <a href="{% url 'Shop' %}" class="shop-now-btn">
+              Shop Now <i class="arrow-icon">→</i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+   
 
     {% comment %} Main product section {% endcomment %}
     <div class="products container mt-5">

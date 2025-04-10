@@ -703,8 +703,42 @@
             }
         }
     </style>
+    <style>
+        .notification {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease-in-out;
+            min-width: 250px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .notification.success { background-color: #16a34a; }
+        .notification.error { background-color: #dc2626; }
+        .notification-icon {
+            margin-right: 8px;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .notification-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+        </style>
+        
 </head>
 <body>
+    <div class="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
     <div class="order-details-container">
         <div class="order-header">
             <div class="order-header-info">
@@ -895,16 +929,13 @@
         
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-   
-
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll('.razorpay-pay-btn').forEach(button => {
                 button.addEventListener('click', async () => {
                     const orderId = button.dataset.orderId;
                     const total = parseFloat(button.dataset.total);
-        
+    
                     const response = await fetch('/create-order/', {
                         method: 'POST',
                         headers: {
@@ -913,9 +944,9 @@
                         },
                         body: JSON.stringify({ cartTotal: total })
                     });
-        
+    
                     const data = await response.json();
-        
+    
                     const options = {
                         key: data.razorpayKeyId,
                         amount: data.amount,
@@ -935,94 +966,113 @@
                                     order_id: orderId
                                 })
                             });
-        
+    
                             const result = await confirm.json();
                             if (result.success) {
-                                alert('Payment completed successfully!');
-                                location.reload();
+                                showNotification('Payment completed successfully!', 'success');
+                                setTimeout(() => location.reload(), 2000);
                             } else {
-                                alert('Payment failed: ' + result.message);
+                                showNotification('Payment failed: ' + result.message, 'error');
                             }
                         },
                         theme: {
                             color: "#000000"
                         }
                     };
-        
+    
                     const rzp = new Razorpay(options);
                     rzp.open();
                 });
             });
-        
+    
+            // Complaint Modal Logic
+            window.openComplaintModal = function (itemId, productName) {
+                const modal = document.getElementById('complaintModal');
+                const productNameElement = document.getElementById('complaintProductName');
+                productNameElement.textContent = `Report Issue: ${productName}`;
+                modal.style.display = 'flex';
+                modal.dataset.itemId = itemId;
+    
+                document.getElementById('complaintType').value = '';
+                document.getElementById('complaintDetails').value = '';
+            }
+    
+            window.submitComplaint = function () {
+                const modal = document.getElementById('complaintModal');
+                const itemId = modal.dataset.itemId;
+                const complaintType = document.getElementById('complaintType').value;
+                const complaintDetails = document.getElementById('complaintDetails').value;
+    
+                if (!complaintType) {
+                    showNotification('Please select an issue type', 'warning');
+                    return;
+                }
+    
+                if (!complaintDetails) {
+                    showNotification('Please provide details about your issue', 'warning');
+                    return;
+                }
+    
+                // Backend AJAX call can be placed here
+                console.log(`Complaint submitted for item ${itemId}`);
+                console.log(`Type: ${complaintType}`);
+                console.log(`Details: ${complaintDetails}`);
+    
+                showNotification('Thank you for reporting this issue. Our team will contact you shortly.', 'success');
+                closeModal('complaintModal');
+            }
+    
             function getCSRFToken() {
                 const cookieValue = document.cookie.split('; ')
                     .find(row => row.startsWith('csrftoken='))
                     ?.split('=')[1];
                 return cookieValue;
             }
-        });
-  
-
-
-
-
-
-        
-        // Function to get CSRF token from cookies
-function getCSRFToken() {
-    let cookieValue = null;
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith('csrftoken=')) {
-            cookieValue = cookie.substring('csrftoken='.length);
-            break;
-        }
-    }
-    return cookieValue;
-}
-
-
-
-    // Complaint functions
-    function openComplaintModal(itemId, productName) {
-        const modal = document.getElementById('complaintModal');
-        const productNameElement = document.getElementById('complaintProductName');
-        productNameElement.textContent = `Report Issue: ${productName}`;
-        modal.style.display = 'flex';
-        modal.dataset.itemId = itemId;
-        
-        // Reset form
-        document.getElementById('complaintType').value = '';
-        document.getElementById('complaintDetails').value = '';
-    }
-
-    function submitComplaint() {
-        const modal = document.getElementById('complaintModal');
-        const itemId = modal.dataset.itemId;
-        const complaintType = document.getElementById('complaintType').value;
-        const complaintDetails = document.getElementById('complaintDetails').value;
-
-        if (!complaintType) {
-            alert('Please select an issue type');
-            return;
-        }
-
-        if (!complaintDetails) {
-            alert('Please provide details about your issue');
-            return;
-        }
-
-        // Here you would typically make an AJAX call to your backend
-        console.log(`Complaint submitted for item ${itemId}`);
-        console.log(`Type: ${complaintType}`);
-        console.log(`Details: ${complaintDetails}`);
-        
-        alert(`Thank you for reporting this issue. Our team will contact you shortly.`);
-        closeModal('complaintModal');
-    }
-
     
+            // Create toast container
+            const toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.position = 'fixed';
+            toastContainer.style.top = '20px';
+            toastContainer.style.right = '20px';
+            toastContainer.style.zIndex = '9999';
+            toastContainer.style.display = 'flex';
+            toastContainer.style.flexDirection = 'column';
+            toastContainer.style.gap = '10px';
+            document.body.appendChild(toastContainer);
+    
+            // Toast notification function
+            window.showNotification = function (message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.padding = '12px 16px';
+                toast.style.borderRadius = '8px';
+                toast.style.color = 'white';
+                toast.style.fontSize = '14px';
+                toast.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+                toast.style.backgroundColor = {
+                    success: '#16a34a',
+                    error: '#dc2626',
+                    warning: '#facc15',
+                    info: '#0ea5e9'
+                }[type] || '#0ea5e9';
+    
+                toastContainer.appendChild(toast);
+    
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        });
+    
+        // Optional: closeModal function if not already defined
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
+    
 </body>
 </html>

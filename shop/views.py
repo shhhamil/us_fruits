@@ -20,7 +20,6 @@ def shop(request):
             output_field=DecimalField()
         )
     )
-    print(Product.objects.filter(is_active=True, category__is_active=True).values_list('offer_price', flat=True))
 
     categories = Category.objects.filter(is_active=True)
 

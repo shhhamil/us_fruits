@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.db.models import F, Sum
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from user_profile.models import Address ,Wallet ,WalletTransaction
+from user_profile.models import Address ,Wallet 
 from auth_admin.models import Product
 import razorpay
 from auth_admin.models import Coupon

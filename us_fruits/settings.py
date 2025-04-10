@@ -32,7 +32,7 @@ SHIPPING_COST = 30
 
 # Application definition
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['3.27.119.151', 'usfruits.servemp3.com'] 
 
 
 SITE_ID= 1

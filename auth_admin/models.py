@@ -239,7 +239,6 @@ class OrderItem(models.Model):
     def get_refund_amount(self):
         return self.get_total_offer_price
 
-    
 # -------------------------------------------------------------------------------------------
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)  
