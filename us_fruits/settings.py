@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-howa*r3h25mk=int^ax(3&njxhsxul)_lae5tl0$3m31pd7zpw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['us-fruits-d4aq.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','us-fruits-d4aq.onrender.com']
 
 
 
