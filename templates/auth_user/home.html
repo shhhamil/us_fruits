@@ -925,6 +925,24 @@
             transform: scale(0.98);
           }
         }
+        .responsive-heading {
+          font-size: 2.5rem;
+          text-align: center;
+          font-weight: bold;
+      }
+      
+      @media (max-width: 768px) {
+          .responsive-heading {
+              font-size: 2rem;
+          }
+      }
+      
+      @media (max-width: 480px) {
+          .responsive-heading {
+              font-size: 2rem;
+          }
+      }
+      
         </style>
     {% endblock %}
   </head>
@@ -1006,7 +1024,8 @@
 
     {% comment %} Main product section {% endcomment %}
     <div class="products container mt-5">
-        <h1 class="text-center mb-5"><b>Special Offers Under ₹111</b></h1>
+      <h1 class="responsive-heading">Special Offers Under ₹111</h1>
+
 
         <div class="product-list">
             {% for product in products %}

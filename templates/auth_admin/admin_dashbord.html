@@ -26,13 +26,17 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         :root {
             --primary-color: #2563eb;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
             --text-color: #333;
-            --bg-color: #f5f5f5;
+            --light-text: #64748b;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
             --sidebar-width: 250px;
             --sidebar-collapsed-width: 70px;
             --header-height: 60px;
@@ -44,7 +48,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar Styles - Unchanged */
         .sidebar {
             position: fixed;
             top: 0;
@@ -98,7 +102,7 @@
             transform: rotate(180deg);
         }
 
-        /* Menu Items */
+        /* Menu Items - Unchanged */
         .menu-list {
             list-style: none;
             padding: 1rem 0;
@@ -142,7 +146,7 @@
             display: none;
         }
 
-        /* Main Content */
+        /* Main Content - Unchanged */
         .main-wrap {
             margin-left: var(--sidebar-width);
             transition: margin var(--transition-speed) ease;
@@ -163,7 +167,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        /* Search Form */
+        /* Search Form - Unchanged */
         .search-form {
             flex: 1;
             max-width: 400px;
@@ -185,7 +189,7 @@
             outline: none;
         }
 
-        /* Dropdown Styles */
+        /* Dropdown Styles - Unchanged */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -216,71 +220,243 @@
             background-color: #f0f0f0;
         }
 
+        /* IMPROVED STYLES FOR DASHBOARD */
+        
         /* Dashboard Container */
         .dashboard-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .dashboard-container h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
+        /* Chart Card - Original Style */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-title {
+            font-size: 18px;
             font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
         }
 
-        /* Responsive Table */
+        .chart-title-icon {
+            margin-right: 8px;
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .chart-control-btn {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-control-btn:hover, .chart-control-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            height: 250px;
+        }
+
+        /* Tables Container */
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        @media (max-width: 992px) {
+            .tables-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Table Card - Improved */
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+            color: white;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .table-header-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
         .responsive-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
         }
 
         .responsive-table th, 
         .responsive-table td {
-            padding: 15px;
+            padding: 15px 20px;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .responsive-table th {
-            background-color: #f9fafb;
+            background-color: rgba(243, 244, 246, 0.8);
             font-weight: 600;
-            color: #4b5563;
+            color: var(--light-text);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .responsive-table tr:last-child td {
             border-bottom: none;
         }
 
+        .responsive-table tr {
+            transition: background-color 0.2s ease;
+        }
+
         .responsive-table tr:hover {
-            background-color: #f9fafb;
+            background-color: rgba(243, 244, 246, 0.5);
+        }
+
+        .rank-column {
+            width: 50px;
+            text-align: center;
+        }
+
+        .rank-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #f1f5f9;
+            color: var(--light-text);
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 auto;
+        }
+
+        .rank-number.top-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .rank-number.top-2 {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            color: white;
+        }
+
+        .rank-number.top-3 {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: white;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-color);
         }
 
         .rank-badge {
-            background: #007bff;
+            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
             color: white;
             padding: 6px 10px;
             border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 600;
             display: inline-block;
+            min-width: 40px;
+            text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .responsive-table {
-                display: block;
-                overflow-x: auto;
-            }
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        .chart-card, .table-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .chart-card {
+            animation-delay: 0.1s;
+        }
+
+        .table-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .table-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        #salesChart {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.1);
+            padding: 1rem;
+        }
+        
+        
     </style>
 </head>
 <body>
@@ -355,66 +531,91 @@
             </div>
         </header>
 
-
-<h2 class="text-xl font-bold mb-4">Sales Chart</h2>
-
-<div class="flex gap-2 mb-4">
-  <button onclick="updateChart('daily')" class="bg-blue-500 text-white px-4 py-1 rounded">Daily</button>
-  <button onclick="updateChart('weekly')" class="bg-blue-500 text-white px-4 py-1 rounded">Weekly</button>
-  <button onclick="updateChart('monthly')" class="bg-blue-500 text-white px-4 py-1 rounded">Monthly</button>
-  <button onclick="updateChart('yearly')" class="bg-blue-500 text-white px-4 py-1 rounded">Yearly</button>
-</div>
-
-<canvas id="salesChart" width="400" height="200"></canvas>
-
-
-       
-        
-
+        <!-- Improved Dashboard Container -->
         <div class="dashboard-container">
-            <h2>Most Popular Products</h2>
-            <table class="responsive-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Product Name</th>
-                        <th>Orders</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in popular_products %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ product.name }}</td>
-                            <td><span class="rank-badge">{{ product.order_count }}</span></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <!-- Chart Card - Original Style -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">
+                        <i class="fas fa-chart-line chart-title-icon"></i>
+                        Sales Overview
+                    </h3>
+                    <div class="chart-controls">
+                        <button onclick="updateChart('daily')" class="chart-control-btn active" id="daily-btn">Daily</button>
+                        <button onclick="updateChart('weekly')" class="chart-control-btn" id="weekly-btn">Weekly</button>
+                        <button onclick="updateChart('monthly')" class="chart-control-btn" id="monthly-btn">Monthly</button>
+                        <button onclick="updateChart('yearly')" class="chart-control-btn" id="yearly-btn">Yearly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
 
-            <h2>Most Popular Categories</h2>
-            <table class="responsive-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Category Name</th>
-                        <th>Orders</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for category in popular_categories %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ category.name }}</td>
-                            <td><span class="rank-badge">{{ category.order_count }}</span></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <!-- Tables Container -->
+            <div class="tables-container">
+                <!-- Products Table Card -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <i class="fas fa-award table-header-icon"></i>
+                        Most Popular Products
+                    </div>
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th class="rank-column">Rank</th>
+                                <th>Product Name</th>
+                                <th>Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in popular_products %}
+                                <tr>
+                                    <td class="rank-column">
+                                        <div class="rank-number {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+                                            {{ forloop.counter }}
+                                        </div>
+                                    </td>
+                                    <td class="product-name">{{ product.name }}</td>
+                                    <td><span class="rank-badge">{{ product.order_count }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Categories Table Card -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <i class="fas fa-tags table-header-icon"></i>
+                        Most Popular Categories
+                    </div>
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th class="rank-column">Rank</th>
+                                <th>Category Name</th>
+                                <th>Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in popular_categories %}
+                                <tr>
+                                    <td class="rank-column">
+                                        <div class="rank-number {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+                                            {{ forloop.counter }}
+                                        </div>
+                                    </td>
+                                    <td class="product-name">{{ category.name }}</td>
+                                    <td><span class="rank-badge">{{ category.order_count }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
-
-
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -422,53 +623,119 @@
             daily: {
                 labels: {{ daily.labels|safe }},
                 data: {{ daily.data|safe }},
+                type: 'bar',
             },
             weekly: {
                 labels: {{ weekly.labels|safe }},
                 data: {{ weekly.data|safe }},
+                type: 'bar',
             },
             monthly: {
                 labels: {{ monthly.labels|safe }},
                 data: {{ monthly.data|safe }},
+                type: 'bar',
             },
             yearly: {
                 labels: {{ yearly.labels|safe }},
                 data: {{ yearly.data|safe }},
-            },
+                type: 'bar',
+            }
         };
     
         const ctx = document.getElementById('salesChart').getContext('2d');
     
-        // Default: Daily
-        let salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartData.daily.labels,
-                datasets: [{
-                    label: 'Sales (₹)',
-                    data: chartData.daily.data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
+        // Create gradient for bars
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, '#60a5fa');  // light blue
+        gradient.addColorStop(1, '#2563eb');  // deep blue
+    
+        function getDataset(data) {
+            return {
+                label: 'Sales (₹)',
+                data: data.data,
+                backgroundColor: gradient,
+                borderColor: gradient,
+                borderWidth: 0,
+                borderRadius: 12,
+                hoverBackgroundColor: '#1e40af',
+                barPercentage: 0.6,
+                categoryPercentage: 0.7
+            };
+        }
+    
+        function getChartOptions() {
+            return {
                 responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10,
+                        borderColor: '#2563eb',
+                        borderWidth: 1,
+                        cornerRadius: 10
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { stepSize: 100 }  // Optional: customize
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            callback: function(value) {
+                                return '₹ ' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#64748b'
+                        }
                     }
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
                 }
-            }
+            };
+        }
+    
+        let salesChart = new Chart(ctx, {
+            type: chartData.daily.type,
+            data: {
+                labels: chartData.daily.labels,
+                datasets: [getDataset(chartData.daily)]
+            },
+            options: getChartOptions()
         });
     
         function updateChart(range) {
-            salesChart.data.labels = chartData[range].labels;
-            salesChart.data.datasets[0].data = chartData[range].data;
-            salesChart.update();
+            document.querySelectorAll('.chart-control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${range}-btn`).classList.add('active');
+    
+            const newData = chartData[range];
+    
+            salesChart.destroy();
+            salesChart = new Chart(ctx, {
+                type: newData.type,
+                data: {
+                    labels: newData.labels,
+                    datasets: [getDataset(newData)]
+                },
+                options: getChartOptions()
+            });
         }
     </script>
+    
+    
     <script>
         // Sidebar Toggle
         document.querySelector('.toggle-btn').addEventListener('click', function () {
@@ -492,7 +759,5 @@
             }
         });
     </script>
-
-    
 </body>
 </html>

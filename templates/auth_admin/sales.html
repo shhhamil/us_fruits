@@ -612,17 +612,23 @@
                             <option value="custom" {% if period == 'custom' %}selected{% endif %}>Custom Range</option>
                         </select>
                     </div>
+            
                     <div class="form-group" id="date-range-fields">
                         <label for="start_date">From Date</label>
                         <input type="date" name="start_date" id="start_date" class="form-input" value="{{ request.GET.start_date|default:'' }}">
                     </div>
+            
                     <div class="form-group">
                         <label for="end_date">To Date</label>
                         <input type="date" name="end_date" id="end_date" class="form-input" value="{{ request.GET.end_date|default:'' }}">
                     </div>
-                    <div class="form-group">
+            
+                    <div class="form-group d-flex" style="gap: 10px;">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-filter"></i> Apply Filter
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearCustomDates()">
+                            Clear Dates
                         </button>
                     </div>
                 </form>
@@ -774,5 +780,13 @@
             document.getElementById('end_date').required = isCustom;
         });
     </script>
+    
+<script>
+    function clearCustomDates() {
+        document.getElementById('start_date').value = '';
+        document.getElementById('end_date').value = '';
+        document.getElementById('period').value = 'custom';
+    }
+</script>
 </body>
 </html>

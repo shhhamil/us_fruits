@@ -25,14 +25,14 @@ SECRET_KEY = 'django-insecure-howa*r3h25mk=int^ax(3&njxhsxul)_lae5tl0$3m31pd7zpw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
 
 SHIPPING_COST = 30
 
 
 # Application definition
 
-ALLOWED_HOSTS = ['3.27.119.151', 'usfruits.servemp3.com'] 
 
 
 SITE_ID= 1
@@ -105,14 +105,13 @@ load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
-        'PORT': os.getenv("DB_PORT"),
+        'NAME': os.getenv("D_NAME"),
+        'USER': os.getenv("D_USER"),
+        'PASSWORD': os.getenv("D_PASSWORD"),
+        'HOST': os.getenv("D_HOST"),
+        'PORT': os.getenv("D_PORT"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -212,12 +211,8 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_REDIRECT_URL = '/'
 
 
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_QUERY_EMAIL = True
-SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  
 

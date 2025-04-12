@@ -677,9 +677,11 @@
 
     <main class="main-wrap">
         <header class="main-header">
-            <form class="search-form">
-                <input type="text" class="search-input" placeholder="Search...">
+            <form method="get" class="search-form">
+                <input type="text" name="search" class="search-input" placeholder="Search..." value="{{ search_term }}">
+                
             </form>
+            
             <div class="header-nav">
                 <div class="dropdown">
                     <a href="#" class="dropdown-toggle" onclick="toggleDropdown()" style="font-size: 24px; cursor: pointer;">

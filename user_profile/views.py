@@ -347,34 +347,38 @@ def payment_success(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 # --------------------------------------------------------------------
 def generate_invoice(request, order_id):
-
-
     order = Order.objects.get(id=order_id)
-    shipping_cost = 30  
-    final_total = order.total + shipping_cost  
-#---------------this for set a  Proper PDF Filename----------------------
+    shipping_cost = 30
+    final_total = order.total + shipping_cost
+
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
-#-----------Create PDF Document-----------
+
     pdf = SimpleDocTemplate(response, pagesize=letter)
     elements = []
     styles = getSampleStyleSheet()
-#---------------Invoice Title (Shop Name and Address)-------------
-    elements.append(Paragraph("<b>US Fruits </b>", styles["Title"]))   
-    elements.append(Spacer(1, 10))  
-# ------------------Bill Header--------------
-    elements.append(Paragraph(f"<b>INVOICE - ORDER {order.id}</b>", styles["Heading2"]))
+
+    elements.append(Paragraph("<b>US Fruits</b>", styles["Title"]))
     elements.append(Spacer(1, 10))
-#---------------User Details Table---------------------------
+    elements.append(Paragraph(f"<b>INVOICE - ORDER #{order.id}</b>", styles["Heading2"]))
+    elements.append(Spacer(1, 10))
+
+    address = order.address
+
     user_info = [
         ["User Name:", order.user.username],
         ["Order Date:", order.date_of_order.strftime('%d-%m-%Y')],
-        ["Total Amount :", f" {order.total:.2f}"],
-        ["Shipping Fee:", f" {shipping_cost:.2f}"],  
-        ["Final Total:", f" {final_total:.2f}"],  
+        ["Phone:", getattr(address, 'phone', 'N/A')],
+        ["Shipping Address:", f"{getattr(address, 'street', '')}, {getattr(address, 'city', '')}, "
+                              f"{getattr(address, 'state', '')} - {getattr(address, 'pin_code', '')}, "
+                              f"{getattr(address, 'country', '')}"],
+        ["Total Amount:", f"Rs {order.total:.2f}"],
+        ["Shipping Fee:", f"Rs {shipping_cost:.2f}"],
+        ["Grand Total:", f"Rs {final_total:.2f}"],
         ["Payment Status:", order.payment_status.capitalize()],
     ]
-    table_user = Table(user_info, colWidths=[180, 220])
+
+    table_user = Table(user_info, colWidths=[180, 300])
     table_user.setStyle(TableStyle([
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
@@ -384,6 +388,7 @@ def generate_invoice(request, order_id):
     ]))
     elements.append(table_user)
     elements.append(Spacer(1, 15))
+
     elements.append(Paragraph("<b>Items Purchased</b>", styles["Heading2"]))
     elements.append(Spacer(1, 5))
 
@@ -392,27 +397,27 @@ def generate_invoice(request, order_id):
         item_data.append([
             item.product.name,
             item.quantity,
-            f" {item.price:.2f}",
-            f" {item.quantity * item.price:.2f}"
+            f"Rs {item.price:.2f}",
+            f"Rs {item.quantity * item.price:.2f}"
         ])
 
     table_items = Table(item_data, colWidths=[200, 60, 100, 100])
     table_items.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#82ae46")),   
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#82ae46")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ]))
     elements.append(table_items)
-    elements.append(Spacer(1, 1))
+    elements.append(Spacer(1, 15))
+
     final_total_data = [
-        ["Subtotal:", f" {order.total:.2f}"],
-        ["Shipping Fee:", f" {shipping_cost:.2f}"],
-        ["Grand Total:", f" {final_total:.2f}"],  
+        ["Shipping Fee:", f"Rs {shipping_cost:.2f}"],
+        ["Grand Total:", f"Rs {final_total:.2f}"],
     ]
-    table_total = Table(final_total_data, colWidths=[250, 100])
+    table_total = Table(final_total_data, colWidths=[360, 100])
     table_total.setStyle(TableStyle([
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
@@ -421,8 +426,9 @@ def generate_invoice(request, order_id):
     ]))
     elements.append(table_total)
 
-    elements.append(Spacer(1, 15))
-    elements.append(Paragraph("<b> Thank you for shopping with us!!!</b>", styles["Heading3"]))
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("<b>Thank you for shopping with us!</b>", styles["Heading3"]))
+
     pdf.build(elements)
     return response
 # ------------------------------------------------------

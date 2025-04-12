@@ -140,22 +140,24 @@ def admin_logout(request):
 # -----------------------------------------View for category management page------------------------------------
 @login_required
 def Category_Manegement(request):
-    page = request.GET.get('page', 1)   
-    search = request.GET.get('search', '')   
-    categories = Category.objects.all()
-    
-    if search:
-        categories = categories.filter(name__icontains=search)
-    
-    paginator = Paginator(categories, 10)  
+    search = request.GET.get('search', '')
+    page = request.GET.get('page', 1)
+
+    categories = Category.objects.filter(name__icontains=search).order_by('-id')
+
+    paginator = Paginator(categories, 10)
     try:
         categories_page = paginator.page(page)
     except PageNotAnInteger:
-        categories_page = paginator.page(1)  
+        categories_page = paginator.page(1)
     except EmptyPage:
-        categories_page = paginator.page(paginator.num_pages)   
-    
-    context = {'categories': categories_page, 'total_categories': categories.count(), 'search_term': search}
+        categories_page = paginator.page(paginator.num_pages)
+
+    context = {
+        'categories': categories_page,
+        'total_categories': categories.count(),
+        'search_term': search
+    }
     return render(request, 'auth_admin/category.html', context)
 # _______________________________________________________________________________________________________________
 # ================================= Add Category =============================================================
@@ -490,10 +492,15 @@ def block_user(request, user_id):
 @login_required
 def order_management(request):
     status_filter = request.GET.get('status', 'all').strip().lower()
+    search_term = request.GET.get('search', '').strip()
+
     orders = Order.objects.all().order_by('-date_of_order')
 
-    if status_filter in dict(Order.STATUS_CHOICES): 
+    if status_filter in dict(Order.STATUS_CHOICES):
         orders = orders.filter(status=status_filter)
+
+    if search_term:
+        orders = orders.filter(id__icontains=search_term)
 
     paginator = Paginator(orders, 5)
     page = request.GET.get('page', 1)
@@ -501,25 +508,25 @@ def order_management(request):
     try:
         orders_page = paginator.page(page)
     except PageNotAnInteger:
-        orders_page = paginator.page(1) 
+        orders_page = paginator.page(1)
     except EmptyPage:
-        orders_page = paginator.page(paginator.num_pages)  
+        orders_page = paginator.page(paginator.num_pages)
 
-    total_orders = paginator.count  
-    total_price = orders.aggregate(Sum('total'))['total__sum'] or 0  
-
+    total_orders = paginator.count
+    total_price = orders.aggregate(Sum('total'))['total__sum'] or 0
 
     complaints = Complaint.objects.filter(order__in=orders, order__status='delivered')
     complaints_dict = {complaint.order.id: complaint for complaint in complaints}
 
     for order in orders_page:
-        order.complaint = complaints_dict.get(order.id)   
+        order.complaint = complaints_dict.get(order.id)
 
     context = {
         'orders': orders_page,
         'current_status': status_filter,
-        'total_orders': total_orders,  
-        'total_price': total_price,  
+        'search_term': search_term,
+        'total_orders': total_orders,
+        'total_price': total_price,
     }
     return render(request, 'auth_admin/order.html', context)
 
