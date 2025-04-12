@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-howa*r3h25mk=int^ax(3&njxhsxul)_lae5tl0$3m31pd7zpw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['us_fruits.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','us_fruits.onrender.com']
 
 
 
@@ -118,8 +118,8 @@ DATABASES = {
         'PORT': os.getenv("D_PORT"),
     }
 }
-import dj_database_url
-DATABASES['default'] = dj_database_url.config(default='postgresql://localhost')
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

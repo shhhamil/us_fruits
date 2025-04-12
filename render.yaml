@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: us-fruits
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn us_fruits.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: us_fruits.settings
+      - key: SECRET_KEY
+        value: your-secret-key-here
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: your-render-app-name.onrender.com
+      # Add all other environment variables below
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USE_TLS
+        value: True
+      - key: EMAIL_HOST_USER
+        value: your-email
+      - key: EMAIL_HOST_PASSWORD
+        value: your-password
+      - key: DEFAULT_FROM_EMAIL
+        value: your-email
+      - key: RAZORPAY_KEY_ID
+        value: your-razorpay-key
+      - key: RAZORPAY_KEY_SECRET
+        value: your-razorpay-secret
+      - key: SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+        value: your-google-client-id
+      - key: SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
+        value: your-google-client-secret
+      - key: DATABASE_URL
+        value: your-postgresql-url
