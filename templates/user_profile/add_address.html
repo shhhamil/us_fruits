@@ -883,7 +883,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.reload(); // ✅ Refresh to see changes
+                window.location.reload(); 
             } else {
                 alert("Error: " + (data.error || "Something went wrong!"));
             }

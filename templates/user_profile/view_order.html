@@ -766,11 +766,13 @@
     ⚠️ Your payment is not completed. Please complete the payment to confirm your order.
   </div>
   <button 
-    class="btn btn-sm btn-warning mt-2 razorpay-pay-btn"
-    data-order-id="{{ order.id }}"
-    data-total="{{ order.total|floatformat:2 }}">
-    Complete Payment
-  </button>
+  class="btn btn-sm btn-warning mt-2 razorpay-pay-btn"
+  data-order-id="{{ order.id }}"
+  data-total="{{ order.total|floatformat:2 }}"
+  style="background-color: #f0ad4e; border-radius: 5px; padding: 10px 20px; font-weight: bold; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s;">
+  Complete Payment
+</button>
+
 {% endif %}
 
           
@@ -951,7 +953,7 @@
                         key: data.razorpayKeyId,
                         amount: data.amount,
                         currency: "INR",
-                        name: "Shamil Store",
+                        name: "Us Fruits",
                         description: "Complete Order Payment",
                         order_id: data.razorpayOrderId,
                         handler: async function (response) {

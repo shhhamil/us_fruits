@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-howa*r3h25mk=int^ax(3&njxhsxul)_lae5tl0$3m31pd7zpw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'us-fruits-d4aq.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 
@@ -73,7 +73,7 @@ MIDDLEWARE = [
 ]
 import os
 
-MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware") 
+ 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'us_fruits.wsgi.application'
 
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv() 
 
 
 DATABASES = {
@@ -117,7 +117,10 @@ DATABASES = {
         'HOST': os.getenv("D_HOST"),
         'PORT': os.getenv("D_PORT"),
     }
+
 }
+
+
 
 
 

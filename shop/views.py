@@ -96,3 +96,7 @@ def single_product(request, product_id):
 # --------------------------------------------------------------------------------------------------------------
 def check_authentication(request):
     return JsonResponse({'is_authenticated': request.user.is_authenticated})
+
+# ----------------------------------------------------------------------------------------------------------------
+def about(request):
+    return render(request,"shop/about.html")

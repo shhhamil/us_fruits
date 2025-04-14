@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}US Fruits - About Us{% endblock %}
+
+{% block extra_css %}
+  <style>
+    :root {
+      --primary-color: #82ae46;
+      --text-color: #333;
+      --light-bg: #f4f4f4;
+      --border-radius: 10px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-bg);
+      padding: 0;
+    }
+    
+    .hero-section {
+      margin-top: 4rem;
+      position: relative;
+      height: 500px;
+      width: 100%;
+    }
+
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 0;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* About Page Styles */
+    .about-container {
+      max-width: 1000px;
+      margin: 3rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 1050px) {
+      .about-container {
+        margin: 3rem 1.5rem;
+      }
+    }
+
+    .about-section {
+      margin-bottom: 3rem;
+    }
+
+    .about-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+
+    .section-title:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+
+    .section-content {
+      color: var(--text-color);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .section-content:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-intro {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .about-intro {
+        flex-direction: row;
+      }
+    }
+
+    .about-image {
+      flex: 1;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      height: 300px;
+    }
+
+    @media (max-width: 767px) {
+      .about-image {
+        height: 250px;
+        width: 100%;
+      }
+    }
+
+    .about-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .about-text {
+      flex: 1;
+    }
+
+    /* Values Section */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .values-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .value-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 3px solid var(--primary-color);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .value-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .value-icon {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .value-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+      color: var(--text-color);
+      text-align: center;
+    }
+
+    .value-card p {
+      flex: 1;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Team Section */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 2rem;
+    }
+
+    @media (min-width: 576px) {
+      .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .team-member {
+      text-align: center;
+      padding: 1rem;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
+    }
+
+    .team-member:hover {
+      transform: translateY(-5px);
+    }
+
+    .team-photo {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 1.5rem;
+      border: 5px solid white;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 480px) {
+      .team-photo {
+        width: 150px;
+        height: 150px;
+      }
+    }
+
+    .team-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .team-name {
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+      color: var(--text-color);
+    }
+
+    .team-position {
+      color: var(--primary-color);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .team-bio {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* Call to Action */
+    .cta-section {
+      text-align: center;
+      padding: 3rem 0 0;
+    }
+
+    .cta-title {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    .cta-text {
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--primary-color);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background: #6a9139;
+      transform: translateY(-2px);
+    }
+
+    /* Additional Responsive Fixes */
+    @media (max-width: 576px) {
+      .hero-section {
+        height: 400px;
+      }
+      
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .section-title {
+        font-size: 1.5rem;
+      }
+      
+      .about-container {
+        padding: 1.5rem;
+      }
+      
+      .about-section {
+        margin-bottom: 2rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <img src="{% static 'userr/images/main.image6.jpg' %}" alt="About US Fruits" class="hero-image">
+    <div class="hero-overlay">
+      <h2 class="hero-title"><b>About Us</b></h2>
+      <p class="hero-subtitle">Learn about our passion for fresh fruits</p>
+    </div>
+  </section>
+
+  <!-- About Content -->
+  <div class="about-container">
+    <!-- Introduction Section -->
+    <section class="about-section">
+      <h2 class="section-title">Our Story</h2>
+      <div class="about-intro">
+        <div class="about-image">
+          <img src="{% static 'userr\images\Screenshot 2025-04-14 095035.png' %}" alt="Our Farm">
+        </div>
+        <div class="about-text">
+          <p class="section-content">
+            US Fruits began in 2015 with a simple mission: to make high-quality, fresh, organic fruits accessible to everyone. What started as a small family farm has grown into a thriving business dedicated to sustainable farming practices and exceptional customer service.
+          </p>
+          <p class="section-content">
+            Founded by the Johnson family, our journey began when we noticed the lack of truly fresh fruits in local markets. We decided to change that by creating a farm-to-table approach that ensures you receive the freshest produce possible.
+          </p>
+          <p class="section-content">
+            Today, we partner with local farmers across the country who share our commitment to organic farming and sustainability. Together, we're building a healthier future by providing nutritious fruits grown with care for both people and the planet.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mission & Vision Section -->
+    <section class="about-section">
+      <h2 class="section-title">Our Mission & Vision</h2>
+      <p class="section-content">
+        <strong>Mission:</strong> To provide the highest quality organic fruits while promoting sustainable farming practices that protect our environment and support local communities.
+      </p>
+      <p class="section-content">
+        <strong>Vision:</strong> To create a world where everyone has access to nutritious, sustainably-grown fruits that contribute to their health and well-being.
+      </p>
+    </section>
+
+    <!-- Company Values Section -->
+    <section class="about-section">
+      <h2 class="section-title">Our Values</h2>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <h3 class="value-title">Sustainability</h3>
+          <p>We're committed to environmentally friendly farming practices that protect our planet for future generations.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <h3 class="value-title">Quality</h3>
+          <p>We never compromise on the quality of our fruits, ensuring you receive only the best nature has to offer.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3 class="value-title">Community</h3>
+          <p>Supporting local farmers and giving back to the communities we serve is at the heart of everything we do.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="about-section">
+      <h2 class="section-title">Meet Our Team</h2>
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="team-photo">
+            <img src="{% static 'userr\images\Faris.jpg' %}" alt="Team Member">
+          </div>
+          <h3 class="team-name">Salman Faris</h3>
+<p class="team-position">Founder & CEO</p>
+<p class="team-bio">Salman Faris started this startup with the goal of promoting organic farming and providing the freshest produce to customers. He oversees the company's growth and quality control processes.</p>
+
+
+        </div>
+        <div class="team-member">
+          <div class="team-photo">
+            <img src="{% static 'userr\images\Unais.jpg' %}" alt="Team Member">
+          </div>
+          <h3 class="team-name">Muhammed Unais</h3>
+<p class="team-position">Founder & CEO</p>
+<p class="team-bio">Muhammed Unais started this startup with the goal of ensuring the highest quality and fresh fruits reach our customers. He oversees the logistics and quality control processes to make sure every product meets our standards.</p>
+
+            </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="about-section cta-section">
+      <h2 class="cta-title">Join Our Fruit Journey</h2>
+      <p class="cta-text">
+        Experience the difference of truly fresh, organic fruits delivered right to your doorstep. Our commitment to quality and sustainability ensures you'll receive the best nature has to offer.
+      </p>
+      <a href="{% url 'Shop' %}" class="cta-button">Shop Now</a>
+    </section>
+  </div>
+{% endblock %}

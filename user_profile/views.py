@@ -105,6 +105,13 @@ def edit_address(request, address_id):
     except Address.DoesNotExist:
         return JsonResponse({"success": False, "error": "Address not found"}, status=404)
 
+
+    if Order.objects.filter(address=address, status__in=["pending", "shipped"]).exists():
+        return JsonResponse({
+            "success": False,
+            "error": "You cannot edit this address while an order is pending or shipped."
+        }, status=400)
+
     if request.method == "POST":
         address.street = request.POST.get("street")
         address.city = request.POST.get("city")
@@ -130,6 +137,7 @@ def edit_address(request, address_id):
         })
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 # ------------------------------------------------------------------------------------------------------
 @login_required
 def delete_address(request, address_id):

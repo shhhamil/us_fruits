@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- CSS Files -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'userr/css/open-iconic-bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'userr/css/animate.css' %}">
     <link rel="stylesheet" href="{% static 'userr/css/owl.carousel.min.css' %}">
@@ -403,12 +404,8 @@
                         <a href="{% url 'Shop' %}" class="nav-link">Shop</a>
                     </li>
                     <li class="nav-item {% if request.resolver_match.url_name == 'Error' %}active{% endif %}">
-                        <a href="{% url 'Error' %}" class="nav-link">About</a>
-                    </li>
-                    <li class="nav-item {% if request.resolver_match.url_name == 'Error' %}active{% endif %}">
-                        <a href="{% url 'Error' %}" class="nav-link">Contact</a>
-                    </li>
-    
+                        <a href="{% url 'About' %}" class="nav-link">About</a>
+                    </li>    
                     <!-- Search  -->
                     <form class="search-form" 
                     hx-get="{% url 'Shop' %}"
