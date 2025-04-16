@@ -55,7 +55,7 @@ def admin_login(request):
         else:
             messages.error(request, 'Invalid user credentials')
         return redirect('Admin_Login')
-    return render(request, 'auth_admin/Admin_login.html')
+    return render(request, 'auth_admin/admin_login.html')
 # ______________________________________________________________________________________________________________
 # ------------------------------------DASHBORD VIEWWS-----------------------------------------------------------
 @never_cache
